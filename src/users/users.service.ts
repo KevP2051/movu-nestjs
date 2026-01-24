@@ -26,9 +26,10 @@ export class UsersService {
 
       });
 
-      this.userRepository.save(user);
+      await this.userRepository.save(user);
 
-      return user;
+      const {password:userPassword, ...userWithoutPassword} = user;
+      return userWithoutPassword;
 
     } catch (error) {
 
@@ -38,18 +39,23 @@ export class UsersService {
 
   }
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    
+    const users = await this.userRepository.find();
+
+    return users;
   }
 
   async findOne(term:string) {
 
     const searchField = getSearchField(term);
-    const user = this.userRepository.findOneBy({[searchField]:term})
+    const user = await this.userRepository.findOneBy({[searchField]:term})
     
     if(!user){
       throw new NotFoundException(`User not found with specified ${[searchField]}`);
     }
+
+    return user;
 
   }
 
@@ -64,7 +70,7 @@ export class UsersService {
   }
 
   private handleDbErrors(error:any){
-    if(error.code===23505) throw new BadRequestException('error.detail');
+    if(error.code==='23505') throw new BadRequestException(error.detail);
     console.log(error);
     throw new InternalServerErrorException('Please check server logs.');
   }
