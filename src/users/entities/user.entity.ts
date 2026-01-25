@@ -28,6 +28,12 @@ export class User {
     })
     password: string;
 
+    @Column({
+        type: 'boolean',
+        default: true
+    })
+    isActive:boolean;
+
 
     @BeforeInsert()
     @BeforeUpdate()
