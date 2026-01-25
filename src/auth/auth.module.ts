@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
+import { EmailModule } from 'src/email/email.module';
 
 @Module({
   controllers: [AuthController],
@@ -28,7 +29,8 @@ import { User } from 'src/users/entities/user.entity';
           }
         }
       }
-    })
+    }),
+    EmailModule
   ],
   exports: [PassportModule, JwtStrategy, JwtModule]
 })

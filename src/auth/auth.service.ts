@@ -5,12 +5,14 @@ import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
+import { EmailService } from 'src/email/email.service';
 
 
 @Injectable()
 export class AuthService {
 
   constructor(private readonly usersService: UsersService,
+    private readonly emailService:EmailService,
     private readonly jwtService: JwtService
   ) {
   }
@@ -21,6 +23,7 @@ export class AuthService {
 
     const user = await this.usersService.create(createUserDto);
 
+    await this.emailService.sendWelcomeEmail(user!.email, user!.fullName);
     return {user, token: this.getJwtToken(user!.id)};
 
 
