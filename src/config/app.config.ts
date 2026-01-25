@@ -12,5 +12,11 @@ export const EnvConfiguration = () => ({
         name:process.env.DB_NAME,
         username:process.env.DB_USERNAME,
         password:process.env.DB_PASSWORD
+    },
+    emailService:{
+        smtpHost:process.env.SMTP_HOST,
+        smtpPort:+process.env.SMTP_PORT!,
+        smtpUser:process.env.SMTP_USER,
+        smtpPass:process.env.SMTP_PASS
     }
 })

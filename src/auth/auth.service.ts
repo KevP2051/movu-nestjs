@@ -5,12 +5,14 @@ import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
+import { EmailService } from 'src/email/email.service';
 
 
 @Injectable()
 export class AuthService {
 
   constructor(private readonly usersService: UsersService,
+    private readonly emailService:EmailService,
     private readonly jwtService: JwtService
   ) {
   }
@@ -20,6 +22,12 @@ export class AuthService {
   async registerUser(createUserDto: CreateUserDto) {
 
     const user = await this.usersService.create(createUserDto);
+
+    try {
+      await this.emailService.sendWelcomeEmail(user!.email, user!.fullName);
+    } catch (error) {
+      console.error('Error sending welcome email:', error.message);
+    }
 
     return {user, token: this.getJwtToken(user!.id)};
 

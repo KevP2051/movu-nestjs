@@ -5,6 +5,7 @@ import { EnvConfiguration, JoiValidationSchema } from './config';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { AuthModule } from './auth/auth.module';
     UsersModule,
     CommonModule,
     AuthModule,
+    EmailModule,
   ],
 })
 export class AppModule { }

@@ -10,5 +10,9 @@ DB_NAME:Joi.string().required(),
 DB_PASSWORD:Joi.string().required(),
 DB_USERNAME:Joi.string().required(),
 JWT_SECRET:Joi.string().required(),
-JWT_EXPIRES_IN:Joi.string().required()
+JWT_EXPIRES_IN:Joi.string().required(),
+SMTP_HOST:Joi.string().required(),
+SMTP_PORT:Joi.number().required(),
+SMTP_USER:Joi.string().required(),
+SMTP_PASS:Joi.string().required(),
 });
