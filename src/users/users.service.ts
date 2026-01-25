@@ -19,16 +19,14 @@ export class UsersService {
 
   async create(createUserDto: CreateUserDto) {
     try {
-      const { password, ...userData } = this.userRepository.create(createUserDto);
+      const { ...userData } = this.userRepository.create(createUserDto);
       const user = this.userRepository.create({
-        ...userData,
-        password: bcrypt.hashSync(password, 10)
-
+        ...userData
       });
 
       await this.userRepository.save(user);
 
-      const {password:userPassword, ...userWithoutPassword} = user;
+      const { password: userPassword, ...userWithoutPassword } = user;
       return userWithoutPassword;
 
     } catch (error) {
@@ -40,18 +38,18 @@ export class UsersService {
   }
 
   async findAll() {
-    
+
     const users = await this.userRepository.find();
 
     return users;
   }
 
-  async findOne(term:string) {
+  async findOne(term: string) {
 
     const searchField = getSearchField(term);
-    const user = await this.userRepository.findOneBy({[searchField]:term})
-    
-    if(!user){
+    const user = await this.userRepository.findOneBy({ [searchField]: term })
+
+    if (!user) {
       throw new NotFoundException(`User not found with specified ${[searchField]}`);
     }
 
@@ -60,17 +58,33 @@ export class UsersService {
   }
 
   //TODO: Update user info
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto) {
+    try {
+
+      const user = await this.userRepository.preload({ id: id, ...updateUserDto });
+      if (!user) throw new NotFoundException(`User with ${id} not found`);
+      
+      await this.userRepository.save(user);
+      return user;
+
+    } catch (error) {
+      
+      this.handleDbErrors(error);
+    
+    }
+
+
+
   }
 
   //TODO: Remove user
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  remove(id: string) {
+    const user = this.findOne(id);
+    this.userRepository.delete(id);
   }
 
-  private handleDbErrors(error:any){
-    if(error.code==='23505') throw new BadRequestException(error.detail);
+  private handleDbErrors(error: any) {
+    if (error.code === '23505') throw new BadRequestException(error.detail);
     console.log(error);
     throw new InternalServerErrorException('Please check server logs.');
   }
