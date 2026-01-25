@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe } from
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Auth } from 'src/auth/decorators';
 
 @Controller('users')
 export class UsersController {
@@ -23,7 +24,11 @@ export class UsersController {
     return this.usersService.update(id, updateUserDto);
   }
 
+
+//TODO: Add Auth()
+//TODO: If the user is a normal user, only let them delete their own account, otherwise, only admins can delete any account
   @Delete(':id')
+  @Auth()
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.remove(id);
   }
