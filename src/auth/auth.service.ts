@@ -4,6 +4,7 @@ import { LoginUserDto } from './dto';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { User } from 'src/users/entities/user.entity';
 
 
 @Injectable()
@@ -49,7 +50,17 @@ export class AuthService {
 
   }
 
-  getJwtToken(id:string){
+  checkStatus(user:User){
+    
+    return{
+      user,
+      token: this.getJwtToken(user.id)
+    }
+
+
+  }
+
+  private getJwtToken(id:string){
    return this.jwtService.sign({
       id: id
     });
