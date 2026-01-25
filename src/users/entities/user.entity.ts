@@ -28,6 +28,20 @@ export class User {
     })
     password: string;
 
+    @Column("text", {
+        array: true,
+        default: ['user']
+    })
+    roles:string[];
+    
+    @Column({
+        type: 'boolean',
+        default: true
+    })
+    isActive:boolean;
+
+    
+
 
     @BeforeInsert()
     @BeforeUpdate()
