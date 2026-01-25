@@ -14,6 +14,7 @@ import { User } from 'src/users/entities/user.entity';
   providers: [AuthService, JwtStrategy],
   imports: [
     TypeOrmModule.forFeature([User]),
+    ConfigModule,
     UsersModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
