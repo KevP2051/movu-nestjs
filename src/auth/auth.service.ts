@@ -23,7 +23,12 @@ export class AuthService {
 
     const user = await this.usersService.create(createUserDto);
 
-    await this.emailService.sendWelcomeEmail(user!.email, user!.fullName);
+    try {
+      await this.emailService.sendWelcomeEmail(user!.email, user!.fullName);
+    } catch (error) {
+      console.error('Error sending welcome email:', error.message);
+    }
+
     return {user, token: this.getJwtToken(user!.id)};
 
 
