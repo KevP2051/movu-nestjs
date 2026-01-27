@@ -4,6 +4,7 @@ import { CreateUserDto } from 'src/users/dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { Auth, GetUser } from './decorators';
 import { User } from 'src/users/entities/user.entity';
+import { CompletePasswordResetDto, RequestPasswordResetDto, VerifyPasswordResetDto } from './dto';
 
 @Controller('auth')
 export class AuthController {
@@ -26,7 +27,7 @@ export class AuthController {
   }
 
   @Post('reset-password/request')
-  requestResetPassword(@Body('email') email: string) {
+  requestResetPassword(@Body() email:RequestPasswordResetDto) {
     //TODO: Dto for body
     //TODO: Token invalidation logic
     //TODO: Send email with reset instructions
@@ -34,14 +35,14 @@ export class AuthController {
   }
 
   @Post('reset-password/verify')
-  confirmResetPassword(@Body() body: { email:string, code:number }) {
+  confirmResetPassword(@Body() body: VerifyPasswordResetDto) {
     //TODO : Dto for body
     //TODO: Verify token and code
     
   }
 
   @Post('reset-password/complete')
-  completeResetPassword(@Body() body: { code:number; newPassword: string }) {
+  completeResetPassword(@Body() body: CompletePasswordResetDto) {
     //TODO : Dto for body
     //TODO: Complete password reset process
   }

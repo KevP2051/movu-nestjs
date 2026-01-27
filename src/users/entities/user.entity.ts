@@ -1,5 +1,7 @@
-import { BeforeInsert, BeforeUpdate, Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import * as bcrypt from 'bcrypt';
+import { VerificationCode } from "src/auth/entities/verification-code.entity";
+import { Exclude } from "class-transformer";
 
 @Entity()
 export class User {
@@ -40,6 +42,13 @@ export class User {
     })
     isActive:boolean;
 
+    @Exclude()
+    @OneToMany(() => VerificationCode, verificationCode => verificationCode.user, {
+        cascade: true,
+        eager: false
+    })
+    @Column({ select: false, nullable: true })
+    verificationCodes: VerificationCode[];
     
 
 
