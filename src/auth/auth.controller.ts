@@ -28,16 +28,15 @@ export class AuthController {
 
   @Post('reset-password/request')
   requestResetPassword(@Body() email:RequestPasswordResetDto) {
-    //TODO: Dto for body
-    //TODO: Token invalidation logic
-    //TODO: Send email with reset instructions
+    
+    return this.authService.requestPasswordReset(email);
+    
 
   }
 
   @Post('reset-password/verify')
   confirmResetPassword(@Body() body: VerifyPasswordResetDto) {
-    //TODO : Dto for body
-    //TODO: Verify token and code
+    return this.authService.verifyResetCode(body);
     
   }
 
@@ -45,6 +44,7 @@ export class AuthController {
   completeResetPassword(@Body() body: CompletePasswordResetDto) {
     //TODO : Dto for body
     //TODO: Complete password reset process
+    //TODO: Invalidate used tokens through changed password date 
   }
 
 }

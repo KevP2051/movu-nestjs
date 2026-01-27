@@ -28,7 +28,7 @@ export class EmailService {
 
   async sendPasswordResetEmail(to: string, name: string, resetCode: string) {
     const html = await ejs.renderFile(
-      join(__dirname, 'templates/password-reset.ejs'),
+      join(__dirname, 'templates/reset-password.ejs'),
       { name, resetCode }
     );
     await this.sendMailSafe({

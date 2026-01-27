@@ -96,9 +96,9 @@ export class AuthService {
 
 
     } catch (error) {
+      console.log(error)
 
       throw new InternalServerErrorException('Failed to process password reset request, check server logs for more details');
-
     }
 
   }
@@ -106,7 +106,7 @@ export class AuthService {
   private async verifyRecentCodesExistence(email: string) {
     const recentCode = await this.verificationCodeRepository.findOne({
       where: {
-        email,
+        email:email,
         used: false,
         createdAt: MoreThan(new Date(Date.now() - 2 * 60 * 1000))
       }
@@ -126,7 +126,8 @@ export class AuthService {
       code,
       createdAt,
       expiresAt,
-      user
+      user,
+      email: user.email
     });
 
     await this.verificationCodeRepository.save(verificationCode);
@@ -136,15 +137,15 @@ export class AuthService {
 
   //Password Reset Verification
 
-  private async verifyCode(verifyPasswordResetDto: VerifyPasswordResetDto) {
+  async verifyResetCode(verifyPasswordResetDto: VerifyPasswordResetDto) {
 
     try {
       const { email, code } = verifyPasswordResetDto;
 
       const verificationCode = await this.verificationCodeRepository.findOne({
         where: {
-          email,
-          code,
+          email: email,
+          code: code,
           used: false,
           expiresAt: MoreThan(new Date())
         },
@@ -158,7 +159,7 @@ export class AuthService {
       verificationCode.used = true;
       await this.verificationCodeRepository.save(verificationCode);
 
-      return verificationCode;
+      return { message: 'Verification successful'};
 
     } catch (error) {
 
@@ -168,6 +169,9 @@ export class AuthService {
 
 
   }
+
+
+
 
   private getJwtToken(id: string) {
     return this.jwtService.sign({

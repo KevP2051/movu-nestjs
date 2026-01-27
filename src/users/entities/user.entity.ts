@@ -47,7 +47,6 @@ export class User {
         cascade: true,
         eager: false
     })
-    @Column({ select: false, nullable: true })
     verificationCodes: VerificationCode[];
     
 
