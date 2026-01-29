@@ -29,13 +29,25 @@ export class EmailService {
   async sendPasswordResetEmail(to: string, name: string, resetCode: string) {
     const html = await ejs.renderFile(
       join(__dirname, 'templates/reset-password.ejs'),
-      { name, resetCode }
+      { name, code: resetCode }
     );
     await this.sendMailSafe({
       to,
       subject: 'Restablecimiento de contraseña',
       html,
-    },  EmailType.PASSWORD_RESET);
+    }, EmailType.PASSWORD_RESET);
+  }
+
+  async sendPasswordChangeEmail(to: string, name: string) {
+    const html = await ejs.renderFile(
+      join(__dirname, 'templates/password-changed.ejs'),
+      { name }
+    );
+    await this.sendMailSafe({
+      to,
+      subject: 'Contraseña cambiada',
+      html,
+    }, EmailType.PASSWORD_CHANGE);
   }
 
   private async sendMailSafe(

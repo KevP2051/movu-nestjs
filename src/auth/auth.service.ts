@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LoginUserDto, RequestPasswordResetDto, VerifyPasswordResetDto } from './dto';
+import { CompletePasswordResetDto, LoginUserDto, RequestPasswordResetDto, VerifyPasswordResetDto } from './dto';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -10,6 +10,7 @@ import { EmailService } from 'src/email/email.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { VerificationCode } from './entities/verification-code.entity';
 import { MoreThan, Repository } from 'typeorm';
+import { UpdateUserDto } from 'src/users/dto';
 
 
 @Injectable()
@@ -106,7 +107,7 @@ export class AuthService {
   private async verifyRecentCodesExistence(email: string) {
     const recentCode = await this.verificationCodeRepository.findOne({
       where: {
-        email:email,
+        email: email,
         used: false,
         createdAt: MoreThan(new Date(Date.now() - 2 * 60 * 1000))
       }
@@ -139,6 +140,14 @@ export class AuthService {
 
   async verifyResetCode(verifyPasswordResetDto: VerifyPasswordResetDto) {
 
+    const verificationCode = await this.getResetCode(verifyPasswordResetDto);
+
+    return { message: 'Verification successful' };
+
+  }
+
+
+  private async getResetCode(verifyPasswordResetDto: VerifyPasswordResetDto) {
     try {
       const { email, code } = verifyPasswordResetDto;
 
@@ -156,20 +165,40 @@ export class AuthService {
         throw new BadRequestException('Invalid or expired verification code');
       }
 
-      verificationCode.used = true;
-      await this.verificationCodeRepository.save(verificationCode);
-
-      return { message: 'Verification successful'};
+      return verificationCode;
 
     } catch (error) {
 
       throw new InternalServerErrorException('Failed to verify code, check server logs for more details');
 
     }
-
-
   }
 
+
+  async completePasswordReset(completePasswordResetDto: CompletePasswordResetDto) {
+    try {
+      const { email, newPassword, code } = completePasswordResetDto;
+
+      const verificationCode = await this.getResetCode({ email, code });
+
+      const hashedPassword = bcrypt.hashSync(newPassword, 10);
+
+      await this.usersService.updatePassword(verificationCode.user.id, hashedPassword);
+
+      verificationCode.used = true;
+      await this.verificationCodeRepository.save(verificationCode);
+
+      await this.emailService.sendPasswordChangeEmail(email, verificationCode.user.fullName);
+
+      return { message: 'Password updated successfully' };
+
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update password, check server logs for more details');
+    }
+  }
 
 
 
