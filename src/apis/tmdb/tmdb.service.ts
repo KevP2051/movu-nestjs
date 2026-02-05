@@ -15,5 +15,13 @@ export class TmdbService {
     ) { }
 
 
+    getMovie(tmdbId: number) {
+        return this.http.get<any>(`${this.baseUrl}/movie/${tmdbId}?api_key=${this.apiKey}`);
+    }
+
+    getPopularMovies() {
+        return this.http.get<any>(`${this.baseUrl}/movie/popular?api_key=${this.apiKey}`);
+    }
+
 
 }
