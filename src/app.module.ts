@@ -7,6 +7,7 @@ import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { TmdbModule } from './apis/tmdb/tmdb.module';
+import { MoviesModule } from './movies/movies.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { TmdbModule } from './apis/tmdb/tmdb.module';
     AuthModule,
     EmailModule,
     TmdbModule,
+    MoviesModule,
   ],
 })
 export class AppModule { }
