@@ -4,7 +4,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { QueryBuilder, Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
 import { validate as isUUID } from 'uuid';
 import { getSearchField } from 'src/common/helpers/search-field.helper';
 
@@ -70,7 +69,7 @@ export class UsersService {
 
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async updateUser(id: string, updateUserDto: UpdateUserDto) {
     try {
 
       const user = await this.userRepository.preload({ id: id, ...updateUserDto });
@@ -91,6 +90,20 @@ export class UsersService {
   remove(id: string) {
     const user = this.findOne(id);
     this.userRepository.delete(id);
+  }
+
+  async updatePassword(id: string, newHashedPassword: string) {
+    try {
+      const user = await this.userRepository.preload({ id: id, password: newHashedPassword });
+      if (!user) throw new NotFoundException(`User with ${id} not found`);
+
+      await this.userRepository.save(user);
+
+      return user;
+    } catch (error) {
+      this.handleDbErrors(error);
+    }
+
   }
 
   private handleDbErrors(error: any) {

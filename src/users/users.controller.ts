@@ -8,7 +8,7 @@ import { Auth } from 'src/auth/decorators';
 export class UsersController {
   constructor(private readonly usersService: UsersService) { }
 
-  
+
   @Get()
   findAll() {
     return this.usersService.findAll();
@@ -23,7 +23,7 @@ export class UsersController {
   //TODO: If the user is a normal user, only let them delete their own account, otherwise, only admins can delete any account
   @Patch(':id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(id, updateUserDto);
+    return this.usersService.updateUser(id, updateUserDto);
   }
 
 
