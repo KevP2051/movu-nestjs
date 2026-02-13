@@ -16,7 +16,7 @@ export class MoviesService {
   }
 
   findOne(id: number) {
-    return this.tmdbService
+    return this.tmdbService.getMovie(id);
   }
 
   update(id: number, updateMovieDto: UpdateMovieDto) {
@@ -28,8 +28,8 @@ export class MoviesService {
     return `This action searches movies with query: ${query}`;
   }
 
-  getPopularMovies() {
-    return this.tmdbService.getPopularMovies();
+  async getPopularMovies() {
+    return await this.tmdbService.getPopularMovies();
   }
 
   getMovieDetails(tmdbId: number) {
