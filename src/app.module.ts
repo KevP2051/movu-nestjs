@@ -8,6 +8,8 @@ import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { TmdbModule } from './apis/tmdb/tmdb.module';
 import { MoviesModule } from './movies/movies.module';
+import { TmdbSyncModule } from './sync/tmdb-sync/tmdb-sync.module';
+import { TmdbSyncModule } from './sync/tmdb-sync/tmdb-sync.module';
 
 @Module({
   imports: [
@@ -37,6 +39,7 @@ import { MoviesModule } from './movies/movies.module';
     EmailModule,
     TmdbModule,
     MoviesModule,
+    TmdbSyncModule,
   ],
 })
 export class AppModule { }
