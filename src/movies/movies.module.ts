@@ -7,5 +7,6 @@ import { TmdbModule } from 'src/apis/tmdb/tmdb.module';
   controllers: [MoviesController],
   providers: [MoviesService],
   imports: [TmdbModule],
+  exports: [MoviesService],
 })
 export class MoviesModule { }

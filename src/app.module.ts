@@ -9,7 +9,6 @@ import { EmailModule } from './email/email.module';
 import { TmdbModule } from './apis/tmdb/tmdb.module';
 import { MoviesModule } from './movies/movies.module';
 import { TmdbSyncModule } from './sync/tmdb-sync/tmdb-sync.module';
-import { TmdbSyncModule } from './sync/tmdb-sync/tmdb-sync.module';
 
 @Module({
   imports: [

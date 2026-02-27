@@ -1,27 +1,31 @@
 import { Injectable } from '@nestjs/common';
 import { CreateTmdbSyncDto } from './dto/create-tmdb-sync.dto';
 import { UpdateTmdbSyncDto } from './dto/update-tmdb-sync.dto';
+import { TmdbService } from 'src/apis/tmdb/tmdb.service';
+import { MoviesService } from 'src/movies/movies.service';
 
 @Injectable()
 export class TmdbSyncService {
 
-  create(createTmdbSyncDto: CreateTmdbSyncDto) {
-    return 'This action adds a new tmdbSync';
+  constructor(
+    private readonly tmdbService: TmdbService,
+    private readonly moviesService: MoviesService
+  ) {
   }
 
-  findAll() {
-    return `This action returns all tmdbSync`;
+
+  syncGenres() {
+
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} tmdbSync`;
+  syncPopularSeries() {
+
   }
 
-  update(id: number, updateTmdbSyncDto: UpdateTmdbSyncDto) {
-    return `This action updates a #${id} tmdbSync`;
+  syncPopularMovies() {
+
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} tmdbSync`;
-  }
+
+
 }

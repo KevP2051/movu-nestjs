@@ -5,30 +5,23 @@ import { UpdateTmdbSyncDto } from './dto/update-tmdb-sync.dto';
 
 @Controller('tmdb-sync')
 export class TmdbSyncController {
-  constructor(private readonly tmdbSyncService: TmdbSyncService) {}
+  constructor(private readonly tmdbSyncService: TmdbSyncService) { }
 
-  @Post()
-  create(@Body() createTmdbSyncDto: CreateTmdbSyncDto) {
-    return this.tmdbSyncService.create(createTmdbSyncDto);
+  @Post('genres')
+  syncGenres() {
+    //genre sync logic
   }
 
-  @Get()
-  findAll() {
-    return this.tmdbSyncService.findAll();
+  @Post('popular-movies')
+  syncPopularMovies() {
+    //movie sync logic
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.tmdbSyncService.findOne(+id);
+  @Post('popular-series')
+  syncPopularSeries() {
+    //tv show sync logic
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTmdbSyncDto: UpdateTmdbSyncDto) {
-    return this.tmdbSyncService.update(+id, updateTmdbSyncDto);
-  }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.tmdbSyncService.remove(+id);
-  }
+
 }
