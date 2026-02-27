@@ -12,6 +12,46 @@ export class Movie {
     })
     tmdbId: string;
 
+    @Column({
+        type: 'text',
+    })
+    title: string;
+
+    @Column({
+        type: 'text',
+    })
+    overview: string;
+
+    @Column({
+        type: 'date',
+    })
+    releaseDate: Date;
+
+    @Column({
+        type: 'text',
+    })
+    posterPath: string;
+
+    @Column({
+        type: 'float',
+        nullable: true
+    })
+    popularity: number;
+
+    @Column({
+        type: "array"
+    })
+
+    genreIds: number[];
+
+    @Column({
+        type: 'boolean',
+        default: false
+    })
+    adult: boolean;
+
+
+
     //Reviews
     //Likes 
     //Wishes

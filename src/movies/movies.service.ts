@@ -23,7 +23,6 @@ export class MoviesService {
     return `This action updates a #${id} movie`;
   }
 
-
   searchMovies(query: string) {
     return `This action searches movies with query: ${query}`;
   }
