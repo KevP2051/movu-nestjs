@@ -2,13 +2,13 @@ import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 
 @Entity()
-export class Movie {
+export class MovieEntity {
 
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
     @Column({
-        type: 'text'
+        type: 'int'
     })
     tmdbId: string;
 
@@ -38,11 +38,11 @@ export class Movie {
     })
     popularity: number;
 
-    @Column({
-        type: "array"
-    })
+    // @Column({
+    //     type: "array"
+    // })
 
-    genreIds: number[];
+    // genreIds: number[];
 
     @Column({
         type: 'boolean',

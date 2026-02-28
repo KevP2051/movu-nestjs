@@ -6,11 +6,17 @@ export class PaginationDto {
     @IsNumber()
     @IsPositive()
     @IsOptional()
-    offset: number;
-
+    limit: number;
 
     @IsNumber()
     @IsPositive()
     @IsOptional()
-    limit: number;
+    page: number;
+
+    @IsNumber()
+    @IsPositive()
+    @IsOptional()
+    totalPages: number;
+
+
 }

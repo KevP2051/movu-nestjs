@@ -26,8 +26,8 @@ export class TmdbService {
         return await this.http.get<any>(`${this.baseUrl}/movie/${tmdbId}?api_key=${this.apiKey}`, { headers: this.headers });
     }
 
-    async getPopularMovies() {
-        const url = `${this.baseUrl}/discover/movie?include_adult=false&include_video=false&language=en-US&page=1&sort_by=popularity.desc`;
+    async getPopularMovies(page: number) {
+        const url = `${this.baseUrl}/movie/popular?page=${page}`;
         return TmdbMovieMapper.toMovieList(await this.http.get<TmdbMovieListResponse>(url, { headers: this.headers }));
     }
 
