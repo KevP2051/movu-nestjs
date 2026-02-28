@@ -8,9 +8,10 @@ export class MovieEntity {
     id: string;
 
     @Column({
-        type: 'int'
+        type: 'int',
+        unique: true
     })
-    tmdbId: string;
+    tmdbId: number;
 
     @Column({
         type: 'text',

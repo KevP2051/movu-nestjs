@@ -21,21 +21,50 @@ export class TmdbSyncService {
 
   }
 
-  syncPopularSeries({ page = 1, totalPages = 1 }: TmdbSyncPaginationDto) {
+  syncPopularSeries({ page = 1, maxPages = 1 }: TmdbSyncPaginationDto) {
 
 
 
   }
 
-  async syncPopularMovies({ page = 1, totalPages = 1 }: TmdbSyncPaginationDto) {
+  async syncPopularMovies({ page = 1, maxPages = 1 }: TmdbSyncPaginationDto) {
+    try {
+      let movies: Movie[] = [];
+      let successCount = 0;
+      let errorCount = 0;
 
-    let movies: Movie[] = [];
+      for (let currentPage = page; currentPage <= maxPages; currentPage++) {
+        try {
+          const pageMovies = await this.tmdbService.getPopularMovies(currentPage);
+          movies.push(...pageMovies);
+        } catch (error) {
+          console.error(`Failed to fetch page ${currentPage}:`, error.message);
+        }
+      }
 
-    for (let currentPage = page; currentPage <= totalPages; currentPage++) {
-      movies = [...movies, ...(await this.tmdbService.getPopularMovies(currentPage))]
+      console.log(`Fetched ${movies.length} valid movies`);
+
+      for (const movie of movies) {
+        try {
+          await this.moviesService.createOrUpdateMovie(movie);
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          console.error(`Failed to save movie ${movie.tmdbId} (${movie.title}):`, error.message);
+        }
+      }
+
+      return {
+        totalFetched: movies.length,
+        successCount,
+        errorCount,
+        message: `Sync completed: ${successCount} saved, ${errorCount} failed`
+      };
+
+    } catch (error) {
+      console.error('Critical error in syncPopularMovies:', error);
+      throw error;
     }
-
-    movies.forEach(movie => { this.moviesService.createMovie(movie) })
   }
 
 

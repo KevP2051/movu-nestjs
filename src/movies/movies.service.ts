@@ -7,6 +7,7 @@ import { MovieEntity } from './entities/movie.entity';
 import { Repository } from 'typeorm';
 import { FindMovieDto } from './dto/find-movie.dto';
 import { PaginationDto } from 'src/common/dto/pagination-dto';
+import { Movie } from 'src/common/interfaces/movie.interface';
 
 @Injectable()
 export class MoviesService {
@@ -31,6 +32,20 @@ export class MoviesService {
     }
 
   }
+
+  async createOrUpdateMovie(movieData: CreateMovieDto) {
+    const existing = await this.movieRepository.findOne({
+      where: { tmdbId: movieData.tmdbId }
+    });
+
+    if (existing) {
+      return this.movieRepository.save({ ...existing, ...movieData });
+    }
+
+    const movie = this.movieRepository.create(movieData);
+    return this.movieRepository.save(movie);
+  }
+
 
   findMovies() {
 
