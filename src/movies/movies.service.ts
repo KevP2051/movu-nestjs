@@ -5,6 +5,8 @@ import { TmdbService } from 'src/apis/tmdb/tmdb.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MovieEntity } from './entities/movie.entity';
 import { Repository } from 'typeorm';
+import { FindMovieDto } from './dto/find-movie.dto';
+import { PaginationDto } from 'src/common/dto/pagination-dto';
 
 @Injectable()
 export class MoviesService {
@@ -30,24 +32,49 @@ export class MoviesService {
 
   }
 
-  findAll() {
-    return `This action returns all movies`;
+  findMovies() {
+
+  }
+
+  findMoviesByGenre(genreId: number) {
+
+  }
+
+
+  async findAllMovies({ genreId, sortBy, sortOrder = 'DESC', page = 1, limit = 20 }: FindMovieDto) {
+    const qb = this.movieRepository.createQueryBuilder('movie');
+
+    if (genreId) {
+      qb.andWhere('movie.genreId = :genreId', { genreId });
+    }
+
+    if (sortBy) {
+      qb.orderBy(`movie.${sortBy}`, sortOrder);
+    }
+
+    qb.skip((page - 1) * limit).take(limit);
+
+    const [data, total] = await qb.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      pageSize: limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   findOne(id: number) {
     return this.tmdbService.getMovie(id);
   }
 
-  update(id: number, updateMovieDto: UpdateMovieDto) {
-    return `This action updates a #${id} movie`;
-  }
-
   searchMovies(query: string) {
     return `This action searches movies with query: ${query}`;
   }
 
-  async getPopularMovies() {
-    return await this.tmdbService.getPopularMovies(1);
+  async getPopularMovies({ page = 1, limit = 20 }: PaginationDto) {
+    return this.findAllMovies({ page, limit, sortBy: 'popularity', sortOrder: 'DESC' });
   }
 
   getMovieDetails(tmdbId: number) {

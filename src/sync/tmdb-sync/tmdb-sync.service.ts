@@ -5,6 +5,7 @@ import { TmdbService } from 'src/apis/tmdb/tmdb.service';
 import { MoviesService } from 'src/movies/movies.service';
 import { PaginationDto } from 'src/common/dto/pagination-dto';
 import { Movie } from 'src/common/interfaces/movie.interface';
+import { TmdbSyncPaginationDto } from './dto/tmdb-sync-pagination.dto';
 
 @Injectable()
 export class TmdbSyncService {
@@ -20,13 +21,13 @@ export class TmdbSyncService {
 
   }
 
-  syncPopularSeries({ page = 1, totalPages = 1 }: PaginationDto) {
+  syncPopularSeries({ page = 1, totalPages = 1 }: TmdbSyncPaginationDto) {
 
 
 
   }
 
-  async syncPopularMovies({ page = 1, totalPages = 1 }: PaginationDto) {
+  async syncPopularMovies({ page = 1, totalPages = 1 }: TmdbSyncPaginationDto) {
 
     let movies: Movie[] = [];
 
