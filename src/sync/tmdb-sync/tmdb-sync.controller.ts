@@ -16,7 +16,7 @@ export class TmdbSyncController {
 
   @Post('popular-movies')
   syncPopularMovies(@Query() queryParameters: TmdbSyncPaginationDto) {
-    this.tmdbSyncService.syncPopularMovies(queryParameters);
+    return this.tmdbSyncService.syncPopularMovies(queryParameters);
   }
 
   @Post('popular-series')
