@@ -7,9 +7,6 @@ import { FindMovieDto } from './dto/find-movie.dto';
 export class MoviesController {
   constructor(private readonly moviesService: MoviesService) { }
 
-
-
-
   @Get()
   findAll(@Query() queryParameters: FindMovieDto) {
     return this.moviesService.findAllMovies(queryParameters);
@@ -24,6 +21,5 @@ export class MoviesController {
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.moviesService.findOne(id);
   }
-
 
 }

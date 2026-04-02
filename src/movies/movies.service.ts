@@ -1,13 +1,16 @@
-import { Injectable } from '@nestjs/common';
+import { ConsoleLogger, Injectable } from '@nestjs/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { TmdbService } from 'src/apis/tmdb/tmdb.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MovieEntity } from './entities/movie.entity';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { FindMovieDto } from './dto/find-movie.dto';
 import { PaginationDto } from 'src/common/dto/pagination-dto';
 import { Movie } from 'src/common/interfaces/movie.interface';
+import { GenreEntity } from 'src/genres/entities/genre.entity';
+import { ContentFactoryService } from '../content/content-factory.service';
+import { CreateContentDto } from 'src/content/dto/create-content.dto';
 
 @Injectable()
 export class MoviesService {
@@ -15,56 +18,63 @@ export class MoviesService {
   constructor(
     @InjectRepository(MovieEntity)
     private readonly movieRepository: Repository<MovieEntity>,
+    @InjectRepository(GenreEntity)
+    private readonly genreRepository: Repository<GenreEntity>,
     private readonly tmdbService: TmdbService,
+    private readonly contentFactoryService: ContentFactoryService,
   ) { }
 
 
 
-  createMovie(createMovieDto: CreateMovieDto) {
+  async createMovie(createContentDto: CreateContentDto) {
 
-
-    try {
-      const movie = this.movieRepository.create(createMovieDto);
-
-      return this.movieRepository.save(movie);
-    } catch (error) {
-      console.log(error)
-    }
+    this.contentFactoryService.createOrUpdateMovieWithContent(createContentDto);
 
   }
 
   async createOrUpdateMovie(movieData: CreateMovieDto) {
-    const existing = await this.movieRepository.findOne({
-      where: { tmdbId: movieData.tmdbId }
-    });
 
-    if (existing) {
-      return this.movieRepository.save({ ...existing, ...movieData });
+    const existingMovie = await this.movieRepository.findOneBy({ id: movieData.id });
+
+    if (existingMovie) {
+      return this.movieRepository.save({ ...existingMovie, ...movieData });
     }
 
     const movie = this.movieRepository.create(movieData);
-    return this.movieRepository.save(movie);
-  }
-
-
-  findMovies() {
-
-  }
-
-  findMoviesByGenre(genreId: number) {
+    return await this.movieRepository.save(movie);
 
   }
 
 
+  async findMoviesByGenre(genreId: number) {
+
+    const moviesByGenre = await this.movieRepository.find({
+      where: {
+        content: {
+          genres: {
+            tmdbId: genreId
+          }
+        }
+      },
+      relations: ['content', 'content.genres']
+    });
+
+    return moviesByGenre;
+  }
+
+
+  //TODO: Add sorting by reviews, score, etc.
   async findAllMovies({ genreId, sortBy, sortOrder = 'DESC', page = 1, limit = 20 }: FindMovieDto) {
-    const qb = this.movieRepository.createQueryBuilder('movie');
+    const qb = this.movieRepository.createQueryBuilder('movie')
+      .leftJoinAndSelect('movie.content', 'content')
+      .leftJoinAndSelect('content.genres', 'genres');
 
     if (genreId) {
-      qb.andWhere('movie.genreId = :genreId', { genreId });
+      qb.andWhere('genres.tmdbId = :genreId', { genreId });
     }
 
     if (sortBy) {
-      qb.orderBy(`movie.${sortBy}`, sortOrder);
+      qb.orderBy(`content.${sortBy}`, sortOrder);
     }
 
     qb.skip((page - 1) * limit).take(limit);
@@ -80,8 +90,11 @@ export class MoviesService {
     };
   }
 
-  findOne(id: number) {
-    return this.tmdbService.getMovie(id);
+  findOne(tmdbId: number) {
+    return this.movieRepository.findOne({
+      where: { content: { tmdbId } },
+      relations: ['content', 'content.genres']
+    });
   }
 
   searchMovies(query: string) {
@@ -90,10 +103,6 @@ export class MoviesService {
 
   async getPopularMovies({ page = 1, limit = 20 }: PaginationDto) {
     return this.findAllMovies({ page, limit, sortBy: 'popularity', sortOrder: 'DESC' });
-  }
-
-  getMovieDetails(tmdbId: number) {
-
   }
 
 }

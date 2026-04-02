@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { AxiosAdapter } from 'src/common/adapters/axios.adapter';
-import { TmdbMovieListResponse } from './interfaces';
+import { TmdbMovieListResponse, TmdbSeriesGenresResponse, TmdbMovieGenresResponse } from './interfaces';
 import { TmdbMovieMapper } from './mappers/tmdb-movie-mapper';
+import { TmdbGenresMapper } from './mappers/tmdb-genres-mapper';
 
 @Injectable()
 export class TmdbService {
@@ -33,6 +34,16 @@ export class TmdbService {
 
     async searchMovies(query: string) {
         return await this.http.get<any>(`${this.baseUrl}/search/movie?query=${encodeURIComponent(query)}`, { headers: this.headers });
+    }
+
+    async getMovieGenres() {
+
+        return TmdbGenresMapper.toMovieGenre(await this.http.get<TmdbMovieGenresResponse>(`${this.baseUrl}/genre/movie/list?api_key=${this.apiKey}`, { headers: this.headers }));
+
+    }
+
+    async getSeriesGenres() {
+        return TmdbGenresMapper.toSeriesGenre(await this.http.get<TmdbSeriesGenresResponse>(`${this.baseUrl}/genre/tv/list?api_key=${this.apiKey}`, { headers: this.headers }));
     }
 
 }

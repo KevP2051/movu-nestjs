@@ -1,57 +1,17 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-
+import { Movie } from "src/common/interfaces/movie.interface";
+import { ContentEntity } from "src/content/entities/content.entity";
+import { Column, Entity, JoinColumn, OneToOne, PrimaryColumn, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class MovieEntity {
 
-    @PrimaryGeneratedColumn('uuid')
-    id: string;
 
-    @Column({
-        type: 'int',
-        unique: true
-    })
-    tmdbId: number;
+    @PrimaryColumn()
+    id: number;
 
-    @Column({
-        type: 'text',
-    })
-    title: string;
-
-    @Column({
-        type: 'text',
-    })
-    overview: string;
-
-    @Column({
-        type: 'date',
-    })
-    releaseDate: Date;
-
-    @Column({
-        type: 'text',
-    })
-    posterPath: string;
-
-    @Column({
-        type: 'float',
-        nullable: true
-    })
-    popularity: number;
-
-    // @Column({
-    //     type: "array"
-    // })
-
-    // genreIds: number[];
-
-    @Column({
-        type: 'boolean',
-        default: false
-    })
-    adult: boolean;
-
-
+    @OneToOne(() => ContentEntity, { cascade: true })
+    @JoinColumn({ name: 'id' })
+    content: ContentEntity;
 
     //Reviews
     //Likes 

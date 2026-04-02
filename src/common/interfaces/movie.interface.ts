@@ -1,11 +1,5 @@
+import { Content } from "./content.interface";
 
-export interface Movie {
-    tmdbId: number;
-    title: string;
-    overview: string;
-    releaseDate: Date;
-    posterPath: string;
-    popularity: number;
-    genreIds: number[];
-    adult: boolean;
+export interface Movie extends Content {
+
 }
