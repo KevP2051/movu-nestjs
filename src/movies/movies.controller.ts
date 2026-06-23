@@ -13,13 +13,18 @@ export class MoviesController {
   }
 
   @Get('popular')
-  async getPopularMovies(@Query() queryParameters: PaginationDto) {
+  async getPopularMoviesByGenre(@Query() queryParameters: PaginationDto) {
     return await this.moviesService.getPopularMovies(queryParameters);
   }
 
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.moviesService.findOne(id);
+  }
+
+  @Get('/home')
+  getHomePageMovies() {
+    return this.moviesService.getHomeMovies();
   }
 
 }

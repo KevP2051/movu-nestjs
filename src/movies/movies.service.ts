@@ -15,6 +15,7 @@ import { CreateContentDto } from 'src/content/dto/create-content.dto';
 @Injectable()
 export class MoviesService {
 
+
   constructor(
     @InjectRepository(MovieEntity)
     private readonly movieRepository: Repository<MovieEntity>,
@@ -103,6 +104,21 @@ export class MoviesService {
 
   async getPopularMovies({ page = 1, limit = 20 }: PaginationDto) {
     return this.findAllMovies({ page, limit, sortBy: 'popularity', sortOrder: 'DESC' });
+  }
+
+
+  async getHomeMovies() {
+    const genres = await this.genreRepository.find()
+
+    const moviesByGenre = await Promise.all(genres.map(async (genre) => {
+      const movies = await this.findMoviesByGenre(genre.tmdbId);
+      return {
+        genre: genre.name,
+        movies: movies.slice(0, 5)
+      };
+    }));
+
+    return moviesByGenre;
   }
 
 }

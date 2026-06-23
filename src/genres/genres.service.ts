@@ -34,8 +34,9 @@ export class GenresService {
     return this.genreRepository.find();
   }
 
-  findAllByType(contentType: ContentTypeEnum) {
-    return this.genreRepository.find({ where: { contentType } });
+  async findAllByType(contentType: ContentTypeEnum) {
+    const genres = await this.genreRepository.find({ where: { contentType } });
+    return genres;
   }
 
   findAllByTmdbIds(tmdbIds: number[], contentType: ContentTypeEnum) {

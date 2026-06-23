@@ -15,8 +15,8 @@ export class GenreEntity {
 
     @Column({
         type: 'enum',
-        enum: ['MOVIE', 'SERIES'],
-        default: 'MOVIE'
+        enum: ['movie', 'series'],
+        default: 'movie'
     })
     contentType: string;
 

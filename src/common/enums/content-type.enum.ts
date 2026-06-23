@@ -1,5 +1,5 @@
 
 export enum ContentTypeEnum {
-    MOVIE = 'MOVIE',
-    SERIES = 'SERIES'
+    MOVIE = 'movie',
+    SERIES = 'series'
 }

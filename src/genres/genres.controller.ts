@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, Query } from '@nestjs/common';
 import { GenresService } from './genres.service';
 import { CreateGenreDto } from './dto/create-genre.dto';
 import { UpdateGenreDto } from './dto/update-genre.dto';
@@ -10,28 +10,12 @@ export class GenresController {
 
 
   @Get()
-  findAll() {
-    return this.genresService.findAll();
+  findAllByContentType(@Query('contentType') contentType: ContentTypeEnum) {
+
+    if (!contentType) return this.genresService.findAll();
+
+    return this.genresService.findAllByType(contentType);
   }
 
-  @Get('movies')
-  findMovieGenres() {
-    return this.genresService.findAllByType(ContentTypeEnum.MOVIE);
-  }
-
-  @Get('series')
-  findSeriesGenres() {
-    return this.genresService.findAllByType(ContentTypeEnum.SERIES);
-  }
-
-  @Get('movies/:id')
-  findOneMovieGenre(@Param('id', ParseIntPipe) id: number) {
-    return this.genresService.findOneByType(id, ContentTypeEnum.MOVIE);
-  }
-
-  @Get('series/:id')
-  findOneSeriesGenre(@Param('id', ParseIntPipe) id: number) {
-    return this.genresService.findOneByType(id, ContentTypeEnum.SERIES);
-  }
 
 }
