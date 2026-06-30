@@ -3,10 +3,6 @@ import { IsEmail, IsString, Matches, MinLength } from "class-validator";
 export class CreateUserDto {
 
     @IsString()
-    @MinLength(3)
-    fullName: string;
-
-    @IsString()
     @Matches(/^(?=.*\p{L})[\p{L}0-9._-]{3,16}$/u, {
         message: 'Username must be 6–16 characters, contain at least one letter, and may include letters, numbers, dot (.), hyphen (-), or underscore (_).'
     })

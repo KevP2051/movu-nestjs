@@ -5,6 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ContentEntity } from './entities/content.entity';
 import { Repository } from 'typeorm';
 import { GenresService } from 'src/genres/genres.service';
+import { ContentTypeEnum } from 'src/common/enums/content-type.enum';
 
 @Injectable()
 export class ContentService {
@@ -24,6 +25,30 @@ export class ContentService {
     return await this.contentRepository.save(content);
 
   }
+
+
+  async getHomeContent(contentType: ContentTypeEnum) {
+
+    const genres = await this.genresService.findAllByType(contentType);
+
+    const contentByGenre = await Promise.all(genres.map(async (genre) => {
+      const content = await this.contentRepository.createQueryBuilder('content')
+        .leftJoinAndSelect('content.genres', 'genres')
+        .where('genres.id = :genreId', { genreId: genre.id })
+        .andWhere('content.type = :contentType', { contentType })
+        .getMany();
+
+      return {
+        genre: genre.name,
+        content: content
+      };
+
+    }));
+
+    return { contentByGenre };
+
+  }
+
 
   findAll() {
     return `This action returns all content`;

@@ -16,6 +16,13 @@ export class ContentEntity {
 
     @Column({
         type: 'text',
+        unique: false
+    })
+    slug: string;
+
+
+    @Column({
+        type: 'text',
     })
     title: string;
 

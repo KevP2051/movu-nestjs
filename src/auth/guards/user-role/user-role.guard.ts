@@ -22,28 +22,28 @@ export class UserRoleGuard implements CanActivate {
 
     const validRoles: ValidRoles[] = this.reflector.get(META_ROLES, context.getHandler());
 
-    if(!validRoles){
+    if (!validRoles) {
       return true;
     }
-    
-    if(validRoles.length === 0){
+
+    if (validRoles.length === 0) {
       return true
     }
 
 
 
     const req = context.switchToHttp().getRequest();
-    const user:User= req.user;
+    const user: User = req.user;
 
-    if(!user) throw new UnauthorizedException('User not found');
+    if (!user) throw new UnauthorizedException('User not found');
 
-    for (const role of user.roles ) {
-      if(validRoles.includes(role as ValidRoles)){
+    for (const role of user.roles) {
+      if (validRoles.includes(role as ValidRoles)) {
         return true;
       }
     }
 
-    throw new ForbiddenException(`User ${user.fullName} needs a valid role.`)
+    throw new ForbiddenException(`User ${user.userName} needs a valid role.`)
 
 
   }

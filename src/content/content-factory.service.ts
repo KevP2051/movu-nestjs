@@ -5,6 +5,7 @@ import { MovieEntity } from '../movies/entities/movie.entity';
 import { CreateContentDto } from './dto/create-content.dto';
 import { GenresService } from '../genres/genres.service';
 import { ContentTypeEnum } from '../common/enums/content-type.enum';
+import slugify from 'slugify';
 
 @Injectable()
 export class ContentFactoryService {
@@ -39,6 +40,7 @@ export class ContentFactoryService {
                 content = queryRunner.manager.create(ContentEntity, {
                     ...createContentDto,
                     genres,
+                    slug: slugify(createContentDto.title, { lower: true, strict: true }),
                 });
             }
             const savedContent = await queryRunner.manager.save(content);
@@ -57,7 +59,7 @@ export class ContentFactoryService {
 
             await queryRunner.commitTransaction();
             return movie;
-        } catch (error) {
+        } catch (error: any) {
             await queryRunner.rollbackTransaction();
             throw new InternalServerErrorException('Failed to create or update movie and content', error.message);
         } finally {
