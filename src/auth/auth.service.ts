@@ -32,7 +32,7 @@ export class AuthService {
     const user = await this.usersService.create(createUserDto);
 
 
-    await this.emailService.sendWelcomeEmail(user!.email, user!.fullName);
+    await this.emailService.sendWelcomeEmail(user!.email, user!.userName);
 
 
     return { user, token: this.getJwtToken(user!.id) };
@@ -91,7 +91,7 @@ export class AuthService {
       await this.verifyRecentCodesExistence(email);
       const verificationCode = await this.createVerificationCode(user);
 
-      await this.emailService.sendPasswordResetEmail(email, user.fullName, verificationCode.code);
+      await this.emailService.sendPasswordResetEmail(email, user.userName, verificationCode.code);
       return { message: 'Verification code sent to email' };
 
 
@@ -188,7 +188,7 @@ export class AuthService {
       verificationCode.used = true;
       await this.verificationCodeRepository.save(verificationCode);
 
-      await this.emailService.sendPasswordChangeEmail(email, verificationCode.user.fullName);
+      await this.emailService.sendPasswordChangeEmail(email, verificationCode.user.userName);
 
       return { message: 'Password updated successfully' };
 

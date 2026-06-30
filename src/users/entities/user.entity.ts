@@ -10,11 +10,6 @@ export class User {
     id: string;
 
     @Column({
-        type: 'text'
-    })
-    fullName: string;
-
-    @Column({
         type: 'text', unique: true
     })
     userName: string;
@@ -34,13 +29,13 @@ export class User {
         array: true,
         default: ['user']
     })
-    roles:string[];
-    
+    roles: string[];
+
     @Column({
         type: 'boolean',
         default: true
     })
-    isActive:boolean;
+    isActive: boolean;
 
     @Exclude()
     @OneToMany(() => VerificationCode, verificationCode => verificationCode.user, {
@@ -48,7 +43,7 @@ export class User {
         eager: false
     })
     verificationCodes: VerificationCode[];
-    
+
 
 
     @BeforeInsert()

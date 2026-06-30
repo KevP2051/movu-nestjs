@@ -6,12 +6,17 @@ import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
+import { TmdbModule } from './apis/tmdb/tmdb.module';
+import { MoviesModule } from './movies/movies.module';
+import { TmdbSyncModule } from './sync/tmdb-sync/tmdb-sync.module';
+import { ContentModule } from './content/content.module';
+import { GenresModule } from './genres/genres.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot(
       {
-        load:[EnvConfiguration],
+        load: [EnvConfiguration],
         validationSchema: JoiValidationSchema
       }
     ),
@@ -33,6 +38,11 @@ import { EmailModule } from './email/email.module';
     CommonModule,
     AuthModule,
     EmailModule,
+    TmdbModule,
+    MoviesModule,
+    TmdbSyncModule,
+    ContentModule,
+    GenresModule,
   ],
 })
 export class AppModule { }
