@@ -15,6 +15,11 @@ export class User {
     userName: string;
 
     @Column({
+        type: 'text', unique: false, nullable: true
+    })
+    avatarUrl?: string;
+
+    @Column({
         type: 'text', unique: true
     })
     email: string;
