@@ -56,11 +56,12 @@ export class UsersService {
 
   }
 
+  //TODO! Check this function, its name is right?
   async findByEmailForAuth(email: string) {
 
     const user = await this.userRepository.findOne({
       where: { email: email },
-      select: { id: true, email: true, password: true }
+      select: { id: true, userName: true, avatarUrl: true, email: true, password: true }
     })
 
     if (!user) throw new NotFoundException(`User with email ${email} not found`);
