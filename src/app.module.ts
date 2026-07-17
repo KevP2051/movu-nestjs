@@ -11,6 +11,7 @@ import { MoviesModule } from './movies/movies.module';
 import { TmdbSyncModule } from './sync/tmdb-sync/tmdb-sync.module';
 import { ContentModule } from './content/content.module';
 import { GenresModule } from './genres/genres.module';
+import { PersonModule } from './person/person.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { GenresModule } from './genres/genres.module';
     TmdbSyncModule,
     ContentModule,
     GenresModule,
+    PersonModule,
   ],
 })
 export class AppModule { }
