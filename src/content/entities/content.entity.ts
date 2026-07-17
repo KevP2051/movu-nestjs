@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn, TableInheritance, ManyToMany, JoinTable } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, TableInheritance, ManyToMany, JoinTable, OneToMany } from "typeorm";
 import { GenreEntity } from "../../genres/entities/genre.entity";
 import { ContentTypeEnum } from "src/common/enums/content-type.enum";
+import { ContentCreditEntity } from "./content-credit";
 
 @Entity()
 export class ContentEntity {
@@ -64,4 +65,6 @@ export class ContentEntity {
     })
     type: ContentTypeEnum;
 
+    @OneToMany(() => ContentCreditEntity, (contentCredit) => contentCredit.content)
+    contentCredits: ContentCreditEntity[];
 }

@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { AxiosAdapter } from 'src/common/adapters/axios.adapter';
 import { TmdbMovieListResponse, TmdbSeriesGenresResponse, TmdbMovieGenresResponse } from './interfaces';
-import { TmdbMovieMapper } from './mappers/tmdb-movie-mapper';
-import { TmdbGenresMapper } from './mappers/tmdb-genres-mapper';
+import { TmdbMovieMapper } from './mappers/tmdb-movie.mapper';
+import { TmdbGenresMapper } from './mappers/tmdb-genres.mapper';
+import { TmdbMovieCreditsResponse } from './interfaces/tmdb-movie-credits.response';
+import { TmdbCreditMapper } from './mappers/tmdb-credit.mapper';
 
 @Injectable()
 export class TmdbService {
@@ -46,4 +48,11 @@ export class TmdbService {
         return TmdbGenresMapper.toSeriesGenre(await this.http.get<TmdbSeriesGenresResponse>(`${this.baseUrl}/genre/tv/list?api_key=${this.apiKey}`, { headers: this.headers }));
     }
 
+    async getMovieCast(tmdbId: number) {
+        return TmdbCreditMapper.toContentCreditEntity(await this.http.get<TmdbMovieCreditsResponse>(`${this.baseUrl}/movie/${tmdbId}/credits?api_key=${this.apiKey}`, { headers: this.headers }));
+    }
+
+    async getSeriesCast(tmdbId: number) {
+        return await this.http.get<any>(`${this.baseUrl}/tv/${tmdbId}/credits?api_key=${this.apiKey}`, { headers: this.headers });
+    }
 }
