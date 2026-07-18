@@ -48,7 +48,14 @@ export class MoviesService {
   findOne(id: string) {
     return this.movieRepository.findOne({
       where: { content: { id } },
-      relations: ['content', 'content.genres']
+      relations: {
+        content: {
+          genres: true,
+          contentCredits: {
+            person: true
+          }
+        }
+      }
     });
   }
 
