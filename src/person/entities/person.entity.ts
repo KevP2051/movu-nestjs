@@ -2,7 +2,7 @@ import { ContentCreditEntity } from "src/content/entities/content-credit";
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
-export class Person {
+export class PersonEntity {
 
     @PrimaryGeneratedColumn('uuid')
     id: string;
@@ -24,7 +24,8 @@ export class Person {
     knownForDepartment: string;
 
     @Column({
-        type: 'text'
+        type: 'text',
+        nullable: true
     })
     profilePath: string;
 

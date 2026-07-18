@@ -1,6 +1,17 @@
 import { Type } from "class-transformer";
-import { IsArray, IsBoolean, IsDate, IsEnum, IsNumber, IsOptional, IsPositive, IsString } from "class-validator";
+import {
+    IsArray,
+    IsBoolean,
+    IsDate,
+    IsEnum,
+    IsNumber,
+    IsOptional,
+    IsPositive,
+    IsString,
+    ValidateNested,
+} from "class-validator";
 import { ContentTypeEnum } from "src/common/enums/content-type.enum";
+import { CreateContentCreditDto } from "./create-content-credit.dto";
 
 export class CreateContentDto {
 
@@ -38,5 +49,10 @@ export class CreateContentDto {
     @IsEnum(ContentTypeEnum)
     type?: ContentTypeEnum;
 
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateContentCreditDto)
+    credits?: CreateContentCreditDto[];
 
 }

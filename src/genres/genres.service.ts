@@ -22,7 +22,7 @@ export class GenresService {
     const existingGenre = await this.genreRepository.findOneBy({ tmdbId: genreData.tmdbId });
 
     if (existingGenre) {
-      return this.genreRepository.save({ ...existingGenre, ...genreData });
+      return await this.genreRepository.save({ ...existingGenre, ...genreData });
     }
 
     const genre = this.genreRepository.create(genreData);

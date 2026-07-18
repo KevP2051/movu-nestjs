@@ -1,10 +1,13 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { DataSource } from 'typeorm';
+import { DataSource, EntityManager } from 'typeorm';
 import { ContentEntity } from './entities/content.entity';
 import { MovieEntity } from '../movies/entities/movie.entity';
 import { CreateContentDto } from './dto/create-content.dto';
+import { CreateContentCreditDto } from './dto/create-content-credit.dto';
 import { GenresService } from '../genres/genres.service';
 import { ContentTypeEnum } from '../common/enums/content-type.enum';
+import { PersonEntity } from '../person/entities/person.entity';
+import { ContentCreditEntity } from './entities/content-credit';
 import slugify from 'slugify';
 
 @Injectable()
@@ -34,8 +37,9 @@ export class ContentFactoryService {
             if (content) {
                 queryRunner.manager.merge(ContentEntity, content, {
                     ...createContentDto,
-                    genres,
+                    genres
                 });
+
             } else {
                 content = queryRunner.manager.create(ContentEntity, {
                     ...createContentDto,
@@ -57,6 +61,10 @@ export class ContentFactoryService {
                 movie = await queryRunner.manager.save(movie);
             }
 
+            for (const credit of createContentDto.credits || []) {
+                await this.createOrUpdateCredit(queryRunner.manager, savedContent, credit);
+            }
+
             await queryRunner.commitTransaction();
             return movie;
         } catch (error: any) {
@@ -65,6 +73,38 @@ export class ContentFactoryService {
         } finally {
             await queryRunner.release();
         }
+    }
+
+    private async createOrUpdateCredit(
+        manager: EntityManager,
+        content: ContentEntity,
+        credit: CreateContentCreditDto,
+    ) {
+        let person = await manager.findOne(PersonEntity, {
+            where: { tmdbId: credit.person.tmdbId },
+        });
+
+        if (person) {
+            manager.merge(PersonEntity, person, credit.person);
+        } else {
+            person = manager.create(PersonEntity, credit.person);
+        }
+        person = await manager.save(person);
+
+        let contentCredit = await manager.findOne(ContentCreditEntity, {
+            where: { content: { id: content.id }, person: { id: person.id } },
+        });
+
+        if (contentCredit) {
+            manager.merge(ContentCreditEntity, contentCredit, { character: credit.character });
+        } else {
+            contentCredit = manager.create(ContentCreditEntity, {
+                character: credit.character,
+                person,
+                content,
+            });
+        }
+        await manager.save(contentCredit);
     }
 
 }

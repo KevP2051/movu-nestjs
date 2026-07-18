@@ -9,7 +9,7 @@ export class PersonController {
 
   @Post()
   create(@Body() createPersonDto: CreatePersonDto) {
-    return this.personService.create(createPersonDto);
+    return this.personService.createOrUpdate(createPersonDto);
   }
 
   @Get()

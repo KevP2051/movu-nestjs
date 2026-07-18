@@ -11,7 +11,7 @@ export class TmdbCreditMapper {
             character: creditMember.character,
             name: creditMember.name,
             knownForDepartment: creditMember.known_for_department,
-            profilePath: creditMember.profile_path
+            profilePath: creditMember.profile_path ?? undefined
         }));
 
         return tmdbCastMembers;

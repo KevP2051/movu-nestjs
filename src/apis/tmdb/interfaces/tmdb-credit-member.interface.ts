@@ -5,6 +5,6 @@ export interface TmdbCreditMember {
     character?: string;
     name: string;
     knownForDepartment: string;
-    profilePath: string | null;
+    profilePath: string | undefined;
 
 }

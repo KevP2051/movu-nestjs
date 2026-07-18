@@ -48,7 +48,7 @@ export class TmdbService {
         return TmdbGenresMapper.toSeriesGenre(await this.http.get<TmdbSeriesGenresResponse>(`${this.baseUrl}/genre/tv/list?api_key=${this.apiKey}`, { headers: this.headers }));
     }
 
-    async getMovieCast(tmdbId: number) {
+    async getMovieCredits(tmdbId: number) {
         return TmdbCreditMapper.toContentCreditEntity(await this.http.get<TmdbMovieCreditsResponse>(`${this.baseUrl}/movie/${tmdbId}/credits?api_key=${this.apiKey}`, { headers: this.headers }));
     }
 
