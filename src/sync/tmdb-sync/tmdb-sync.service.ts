@@ -70,8 +70,11 @@ export class TmdbSyncService {
       try {
         const movies = await this.tmdbService.getPopularMovies(currentPage);
 
+
         for (const movie of movies) {
-          await this.contentFactory.createOrUpdateMovieWithContent({
+
+          const credits = await this.tmdbService.getMovieCredits(movie.tmdbId);
+          const content = await this.contentFactory.createOrUpdateMovieWithContent({
             tmdbId: movie.tmdbId,
             title: movie.title,
             overview: movie.overview,
@@ -80,7 +83,17 @@ export class TmdbSyncService {
             popularity: movie.popularity,
             adult: movie.adult,
             genreIds: (movie as any).genreIds || [],
+            credits: credits.map((creditMember) => ({
+              character: creditMember.character,
+              person: {
+                tmdbId: creditMember.tmdbId,
+                name: creditMember.name,
+                profilePath: creditMember.profilePath,
+                knownForDepartment: creditMember.knownForDepartment,
+              },
+            })),
           });
+
           totalSynced++;
         }
 
