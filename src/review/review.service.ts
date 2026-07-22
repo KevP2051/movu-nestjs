@@ -50,7 +50,7 @@ export class ReviewService {
 
   async update(id: string, userId: string, updateReviewDto: UpdateReviewDto) {
 
-    const reviewToUpdate = await this.reviewRepository.findOne({ where: { id } });
+    const reviewToUpdate = await this.reviewRepository.findOne({ where: { id }, relations: { user: true } });
 
     if (!reviewToUpdate) {
       throw new NotFoundException(`Review with id ${id} not found`);
@@ -59,15 +59,18 @@ export class ReviewService {
     if (reviewToUpdate.user.id !== userId) {
       throw new ForbiddenException('You can only update your own reviews');
     }
+    Object.assign(reviewToUpdate, updateReviewDto);
+
+    await this.reviewRepository.save(reviewToUpdate);
+
+    return { message: `Review with id ${id} has been updated` }
 
 
-    await this.reviewRepository.update(id, updateReviewDto);
-    return `This action updates a #${id} review`;
   }
 
   async remove(id: string, userId: string) {
 
-    const reviewToDelete = await this.reviewRepository.findOne({ where: { id } });
+    const reviewToDelete = await this.reviewRepository.findOne({ where: { id }, relations: { user: true } });
 
     if (!reviewToDelete) {
       throw new NotFoundException(`Review with id ${id} not found`);
