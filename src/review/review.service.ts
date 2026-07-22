@@ -34,7 +34,12 @@ export class ReviewService {
   }
 
   findAll() {
-    return `This action returns all review`;
+    return this.reviewRepository.find({
+      relations: {
+        content: true,
+        user: true
+      }
+    })
   }
 
   async findOneByUserAndContent(contentId: string, userId: string) {
