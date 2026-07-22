@@ -34,6 +34,8 @@ export class ReviewService {
   }
 
   findAll() {
+    //TODO! Implement pagination and filtering by rating
+    //TODO This method should only return needed information about user and content, not the whole entities
     return this.reviewRepository.find({
       relations: {
         content: true,
