@@ -28,9 +28,6 @@ export class ReviewService {
 
     const review = this.reviewRepository.create({ ...createReviewDto, user: { id: userId }, content: { id: createReviewDto.contentId } });
     return await this.reviewRepository.save(review);
-
-
-    return 'This action adds a new review';
   }
 
   findAll() {
@@ -55,7 +52,17 @@ export class ReviewService {
     return `This action updates a #${id} review`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} review`;
+  async remove(id: string) {
+
+    const reviewToDelete = this.reviewRepository.findOne({ where: { id } });
+
+    if (!reviewToDelete) {
+      throw new NotFoundException(`Review with id ${id} not found`);
+    }
+
+    await this.reviewRepository.delete(id);
+
+    return `Review with id ${id} has been deleted`;
+
   }
 }
