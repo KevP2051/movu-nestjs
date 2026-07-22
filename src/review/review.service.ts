@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -48,19 +48,32 @@ export class ReviewService {
     return review;
   }
 
-  update(id: number, updateReviewDto: UpdateReviewDto) {
+  async update(id: string, userId: string, updateReviewDto: UpdateReviewDto) {
+
+    const reviewToUpdate = await this.reviewRepository.findOne({ where: { id } });
+
+    if (!reviewToUpdate) {
+      throw new NotFoundException(`Review with id ${id} not found`);
+    }
+
+    if (reviewToUpdate.user.id !== userId) {
+      throw new ForbiddenException('You can only update your own reviews');
+    }
+
+
+    await this.reviewRepository.update(id, updateReviewDto);
     return `This action updates a #${id} review`;
   }
 
   async remove(id: string) {
 
-    const reviewToDelete = this.reviewRepository.findOne({ where: { id } });
+    const reviewToDelete = await this.reviewRepository.findOne({ where: { id } });
 
     if (!reviewToDelete) {
       throw new NotFoundException(`Review with id ${id} not found`);
     }
 
-    await this.reviewRepository.delete(id);
+    await this.reviewRepository.remove(reviewToDelete);
 
     return `Review with id ${id} has been deleted`;
 
