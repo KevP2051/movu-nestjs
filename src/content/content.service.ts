@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -54,8 +54,17 @@ export class ContentService {
     return `This action returns all content`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} content`;
+  async findOne(contentId: string) {
+    try {
+      const content = await this.contentRepository.findOne({ where: { id: contentId } });
+      if (!content) {
+        throw new NotFoundException('Content not found');
+      }
+      return content;
+    } catch (error) {
+
+    }
+
   }
 
   update(id: number, updateContentDto: UpdateContentDto) {
