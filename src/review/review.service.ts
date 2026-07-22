@@ -65,12 +65,15 @@ export class ReviewService {
     return `This action updates a #${id} review`;
   }
 
-  async remove(id: string) {
+  async remove(id: string, userId: string) {
 
     const reviewToDelete = await this.reviewRepository.findOne({ where: { id } });
 
     if (!reviewToDelete) {
       throw new NotFoundException(`Review with id ${id} not found`);
+    }
+    if (reviewToDelete.user.id !== userId) {
+      throw new ForbiddenException('You can only delete your own reviews');
     }
 
     await this.reviewRepository.remove(reviewToDelete);
