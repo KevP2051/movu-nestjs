@@ -12,6 +12,7 @@ import { TmdbSyncModule } from './sync/tmdb-sync/tmdb-sync.module';
 import { ContentModule } from './content/content.module';
 import { GenresModule } from './genres/genres.module';
 import { PersonModule } from './person/person.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { PersonModule } from './person/person.module';
     ContentModule,
     GenresModule,
     PersonModule,
+    ReviewModule,
   ],
 })
 export class AppModule { }
