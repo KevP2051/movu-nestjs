@@ -11,6 +11,6 @@ import { ContentCreditEntity } from './entities/content-credit';
   imports: [TypeOrmModule.forFeature([ContentEntity, ContentCreditEntity]), GenresModule],
   controllers: [ContentController],
   providers: [ContentService, ContentFactoryService],
-  exports: [ContentFactoryService]
+  exports: [ContentFactoryService, ContentService]
 })
 export class ContentModule { }
