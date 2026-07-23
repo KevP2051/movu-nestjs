@@ -46,6 +46,7 @@ export class ReviewService {
   async findByContent(
     contentId: string,
     findReviewsDto: FindReviewsDto,
+    userId?: string
   ) {
     const {
       page = 1,
@@ -61,6 +62,10 @@ export class ReviewService {
 
     if (rating) {
       query.andWhere('review.rating = :rating', { rating });
+    }
+
+    if (userId) {
+      query.andWhere('review.userId != :userId', { userId });
     }
 
     switch (sort) {
@@ -104,7 +109,7 @@ export class ReviewService {
   async findOneByUserAndContent(contentId: string, userId: string) {
 
     const content = await this.contentService.findOne(contentId);
-    const review = await this.reviewRepository.findOne({ where: { content: { id: content?.id }, user: { id: userId } } });
+    const review = await this.reviewRepository.findOne({ where: { content: { id: content?.id }, user: { id: userId } }, relations: { user: true } });
     return review;
   }
 

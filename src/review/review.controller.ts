@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, ParseUUIDPipe, Query
 import { ReviewService } from './review.service';
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
-import { Auth, GetUser } from 'src/auth/decorators';
+import { Auth, GetUser, OptionalAuth } from 'src/auth/decorators';
 import { User } from 'src/users/entities/user.entity';
 import { FindReviewsDto } from './dto/find-reviews.dto';
 
@@ -11,11 +11,22 @@ export class ReviewController {
   constructor(private readonly reviewService: ReviewService) { }
 
   @Get(':contentId')
+  @OptionalAuth()
   findByContent(
     @Param('contentId', ParseUUIDPipe) contentId: string,
-    @Query() findReviewsDto: FindReviewsDto
+    @Query() findReviewsDto: FindReviewsDto, @GetUser() user?: User
   ) {
-    return this.reviewService.findByContent(contentId, findReviewsDto);
+    return this.reviewService.findByContent(contentId, findReviewsDto, user?.id);
+  }
+
+
+  @Get(':contentId/my-review')
+  @Auth()
+  findOneByUserAndContent(
+    @Param('contentId', ParseUUIDPipe) contentId: string,
+    @GetUser() user: User
+  ) {
+    return this.reviewService.findOneByUserAndContent(contentId, user.id);
   }
 
   @Post()
@@ -36,6 +47,7 @@ export class ReviewController {
   update(@Param('id', ParseUUIDPipe) id: string, @GetUser() user: User, @Body() updateReviewDto: UpdateReviewDto) {
     return this.reviewService.update(id, user.id, updateReviewDto);
   }
+
 
 
 }
