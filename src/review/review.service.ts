@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Review } from './entities/review.entity';
 import { Repository } from 'typeorm';
 import { ContentService } from 'src/content/content.service';
+import { FindReviewsDto } from './dto/find-reviews.dto';
+import { ReviewSortEnum } from './enums/review-sort.enum';
 
 @Injectable()
 export class ReviewService {
@@ -39,6 +41,64 @@ export class ReviewService {
         user: true
       }
     })
+  }
+
+  async findByContent(
+    contentId: string,
+    findReviewsDto: FindReviewsDto,
+  ) {
+    const {
+      page = 1,
+      limit = 20,
+      rating,
+      sort,
+    } = findReviewsDto;
+
+    const query = this.reviewRepository
+      .createQueryBuilder('review')
+      .leftJoinAndSelect('review.user', 'user')
+      .where('review.contentId = :contentId', { contentId });
+
+    if (rating) {
+      query.andWhere('review.rating = :rating', { rating });
+    }
+
+    switch (sort) {
+      case ReviewSortEnum.NEWEST:
+        query.orderBy('review.createdAt', 'DESC');
+        break;
+
+      case ReviewSortEnum.OLDEST:
+        query.orderBy('review.createdAt', 'ASC');
+        break;
+
+      case ReviewSortEnum.HIGHEST_RATED:
+        query.orderBy('review.rating', 'DESC');
+        break;
+
+      case ReviewSortEnum.LOWEST_RATED:
+        query.orderBy('review.rating', 'ASC');
+        break;
+
+      default:
+        query.orderBy('review.createdAt', 'DESC');
+    }
+
+    query
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [reviews, total] = await query.getManyAndCount();
+
+    return {
+      data: reviews,
+      pagination: {
+        page,
+        limit,
+        totalItems: total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async findOneByUserAndContent(contentId: string, userId: string) {
@@ -81,7 +141,7 @@ export class ReviewService {
 
     await this.reviewRepository.remove(reviewToDelete);
 
-    return `Review with id ${id} has been deleted`;
+    return { message: `Review with id ${id} has been deleted` };
 
   }
 }

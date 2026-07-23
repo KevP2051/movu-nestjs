@@ -1,6 +1,6 @@
 import { ContentEntity } from "src/content/entities/content.entity";
 import { User } from "src/users/entities/user.entity";
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Review {
@@ -26,10 +26,17 @@ export class Review {
     })
     rating: number;
 
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
     @ManyToOne(() => ContentEntity, (content) => content.reviews, { nullable: false })
     content: ContentEntity;
 
     @ManyToOne(() => User, (user) => user.reviews, { nullable: false })
     user: User;
+
 
 }
