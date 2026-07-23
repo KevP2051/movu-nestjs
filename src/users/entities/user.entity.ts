@@ -2,6 +2,7 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGenerated
 import * as bcrypt from 'bcrypt';
 import { VerificationCode } from "src/auth/entities/verification-code.entity";
 import { Exclude } from "class-transformer";
+import { Review } from "src/review/entities/review.entity";
 
 @Entity()
 export class User {
@@ -42,6 +43,13 @@ export class User {
     })
     isActive: boolean;
 
+    @OneToMany(() => Review, review => review.user, {
+        cascade: true,
+        eager: false
+    })
+    reviews: Review[];
+
+    //TODO: Implement code verification
     @Exclude()
     @OneToMany(() => VerificationCode, verificationCode => verificationCode.user, {
         cascade: true,

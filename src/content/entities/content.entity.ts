@@ -2,6 +2,7 @@ import { Column, Entity, PrimaryGeneratedColumn, TableInheritance, ManyToMany, J
 import { GenreEntity } from "../../genres/entities/genre.entity";
 import { ContentTypeEnum } from "src/common/enums/content-type.enum";
 import { ContentCreditEntity } from "./content-credit";
+import { Review } from "src/review/entities/review.entity";
 
 @Entity()
 export class ContentEntity {
@@ -67,4 +68,7 @@ export class ContentEntity {
 
     @OneToMany(() => ContentCreditEntity, (contentCredit) => contentCredit.content)
     contentCredits: ContentCreditEntity[];
+
+    @OneToMany(() => Review, (review) => review.content)
+    reviews: Review[];
 }
