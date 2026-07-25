@@ -13,6 +13,7 @@ import { ContentModule } from './content/content.module';
 import { GenresModule } from './genres/genres.module';
 import { PersonModule } from './person/person.module';
 import { ReviewModule } from './review/review.module';
+import { SeedModule } from './seed/seed.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { ReviewModule } from './review/review.module';
     GenresModule,
     PersonModule,
     ReviewModule,
+    SeedModule,
   ],
 })
 export class AppModule { }
