@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, TableInheritance, ManyToMany, JoinTable, OneToMany } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, TableInheritance, ManyToMany, JoinTable, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { GenreEntity } from "../../genres/entities/genre.entity";
 import { ContentTypeEnum } from "src/common/enums/content-type.enum";
 import { ContentCreditEntity } from "./content-credit";
@@ -65,6 +65,25 @@ export class ContentEntity {
         default: ContentTypeEnum.MOVIE
     })
     type: ContentTypeEnum;
+
+    @Column({
+        type: 'text',
+        nullable: true
+    })
+    backdropUrl?: string;
+
+    @Column({
+        type: 'int',
+        default: 0
+    })
+    reviewsCount: number;
+
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @UpdateDateColumn()
+    updatedAt: Date;
+
 
     @OneToMany(() => ContentCreditEntity, (contentCredit) => contentCredit.content)
     contentCredits: ContentCreditEntity[];
