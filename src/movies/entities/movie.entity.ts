@@ -1,6 +1,7 @@
+import { U } from "node_modules/@faker-js/faker/dist/index-BSUsvzGS";
 import { Movie } from "src/common/interfaces/movie.interface";
 import { ContentEntity } from "src/content/entities/content.entity";
-import { Column, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, JoinColumn, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class MovieEntity {
@@ -9,13 +10,19 @@ export class MovieEntity {
     @PrimaryGeneratedColumn('uuid')
     id: string;
 
+    @Column({
+        type: 'int',
+        default: 0
+    })
+    runtime: number;
 
     @OneToOne(() => ContentEntity, { cascade: true })
     @JoinColumn({ name: 'id' })
     content: ContentEntity;
 
-    //Reviews
-    //Likes 
-    //Wishes
+    @CreateDateColumn()
+    createdAt: Date;
 
+    @UpdateDateColumn()
+    updatedAt: Date;
 }
