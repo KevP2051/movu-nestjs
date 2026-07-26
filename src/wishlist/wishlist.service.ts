@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateWishlistDto } from './dto/create-wishlist.dto';
 import { UpdateWishlistDto } from './dto/update-wishlist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,10 +18,15 @@ export class WishlistService {
     const existingWishlist = await this.findOne(userId, createWishlistDto.contentId);
 
     if (existingWishlist) {
-      throw new Error('Content already in wishlist');
+      throw new ConflictException('Content already in wishlist');
     }
 
-    const wishlist = this.wishlistRepository.create({ ...createWishlistDto, users: { id: userId } });
+    // La entidad expone la relación `content`, no una columna `contentId`:
+    // pasar el dto tal cual hacía que TypeORM lo ignorara y guardara content = NULL.
+    const wishlist = this.wishlistRepository.create({
+      content: { id: createWishlistDto.contentId },
+      users: { id: userId }
+    });
 
     return await this.wishlistRepository.save(wishlist);
   }
@@ -40,9 +45,10 @@ export class WishlistService {
     return wishlists;
   }
 
-  async findOne(userId: string, id: string) {
+  // Se busca por contenido, no por id de fila: el cliente solo conoce el contentId.
+  async findOne(userId: string, contentId: string) {
     const wishlist = await this.wishlistRepository.findOne({
-      where: { id: id, users: { id: userId } },
+      where: { content: { id: contentId }, users: { id: userId } },
       relations: {
         content: true
       }
@@ -51,15 +57,15 @@ export class WishlistService {
     return wishlist;
   }
 
-  async remove(userId: string, id: string) {
+  async remove(userId: string, contentId: string) {
 
-    const wishlist = await this.findOne(userId, id);
+    const wishlist = await this.findOne(userId, contentId);
 
     if (!wishlist) {
-      throw new NotFoundException(`Wishlist with id ${id} not found`);
+      throw new NotFoundException(`Content ${contentId} is not in the wishlist`);
     }
 
-    return await this.wishlistRepository.delete({ id: id });
+    return await this.wishlistRepository.delete({ id: wishlist.id });
 
   }
 

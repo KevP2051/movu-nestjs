@@ -20,15 +20,15 @@ export class FavoriteController {
     return this.favoriteService.findAllByUser(user.id);
   }
 
-  @Get(':id')
+  @Get(':contentId')
   @Auth()
-  findOne(@GetUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
-    return this.favoriteService.findOne(user.id, id);
+  findOne(@GetUser() user: User, @Param('contentId', ParseUUIDPipe) contentId: string) {
+    return this.favoriteService.findOne(user.id, contentId);
   }
 
-  @Delete(':id')
+  @Delete(':contentId')
   @Auth()
-  remove(@GetUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
-    return this.favoriteService.remove(user.id, id);
+  remove(@GetUser() user: User, @Param('contentId', ParseUUIDPipe) contentId: string) {
+    return this.favoriteService.remove(user.id, contentId);
   }
 }

@@ -21,15 +21,15 @@ export class WishlistController {
     return this.wishlistService.findAllByUser(user.id);
   }
 
-  @Get(':id')
+  @Get(':contentId')
   @Auth()
-  findOne(@GetUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
-    return this.wishlistService.findOne(user.id, id);
+  findOne(@GetUser() user: User, @Param('contentId', ParseUUIDPipe) contentId: string) {
+    return this.wishlistService.findOne(user.id, contentId);
   }
 
-  @Delete(':id')
+  @Delete(':contentId')
   @Auth()
-  remove(@GetUser() user: User, @Param('id', ParseUUIDPipe) id: string) {
-    return this.wishlistService.remove(user.id, id);
+  remove(@GetUser() user: User, @Param('contentId', ParseUUIDPipe) contentId: string) {
+    return this.wishlistService.remove(user.id, contentId);
   }
 }

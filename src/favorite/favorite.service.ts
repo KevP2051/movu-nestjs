@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FavoriteEntity } from './entities/favorite.entity';
@@ -17,10 +17,15 @@ export class FavoriteService {
     const existingFavorite = await this.findOne(userId, createFavoriteDto.contentId);
 
     if (existingFavorite) {
-      throw new Error('Content already in favorites');
+      throw new ConflictException('Content already in favorites');
     }
 
-    const favorite = this.favoriteRepository.create({ ...createFavoriteDto, users: { id: userId } });
+    // La entidad expone la relación `content`, no una columna `contentId`:
+    // pasar el dto tal cual hacía que TypeORM lo ignorara y guardara content = NULL.
+    const favorite = this.favoriteRepository.create({
+      content: { id: createFavoriteDto.contentId },
+      users: { id: userId }
+    });
 
     return await this.favoriteRepository.save(favorite);
   }
@@ -39,9 +44,10 @@ export class FavoriteService {
     return favorites;
   }
 
-  async findOne(userId: string, id: string) {
+  // Se busca por contenido, no por id de fila: el cliente solo conoce el contentId.
+  async findOne(userId: string, contentId: string) {
     const favorite = await this.favoriteRepository.findOne({
-      where: { id: id, users: { id: userId } },
+      where: { content: { id: contentId }, users: { id: userId } },
       relations: {
         content: true
       }
@@ -50,15 +56,15 @@ export class FavoriteService {
     return favorite;
   }
 
-  async remove(userId: string, id: string) {
+  async remove(userId: string, contentId: string) {
 
-    const favorite = await this.findOne(userId, id);
+    const favorite = await this.findOne(userId, contentId);
 
     if (!favorite) {
-      throw new NotFoundException(`Favorite with id ${id} not found`);
+      throw new NotFoundException(`Content ${contentId} is not in favorites`);
     }
 
-    return await this.favoriteRepository.delete({ id: id });
+    return await this.favoriteRepository.delete({ id: favorite.id });
 
   }
 
