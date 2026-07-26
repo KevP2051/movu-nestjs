@@ -10,6 +10,8 @@ import { Movie } from 'src/common/interfaces/movie.interface';
 import { GenreEntity } from 'src/genres/entities/genre.entity';
 import { ContentFactoryService } from '../content/content-factory.service';
 import { CreateContentDto } from 'src/content/dto/create-content.dto';
+import { WishlistService } from 'src/wishlist/wishlist.service';
+import { FavoriteService } from 'src/favorite/favorite.service';
 
 @Injectable()
 export class MoviesService {
@@ -22,13 +24,15 @@ export class MoviesService {
     private readonly genreRepository: Repository<GenreEntity>,
     private readonly tmdbService: TmdbService,
     private readonly contentFactoryService: ContentFactoryService,
+    private readonly wishlistService: WishlistService,
+    private readonly favoriteService: FavoriteService,
   ) { }
 
 
 
   async createMovie(createContentDto: CreateContentDto) {
 
-    this.contentFactoryService.createOrUpdateMovieWithContent(createContentDto);
+    return this.contentFactoryService.createOrUpdateMovie(createContentDto);
 
   }
 
@@ -45,8 +49,8 @@ export class MoviesService {
 
   }
 
-  findOne(id: string) {
-    return this.movieRepository.findOne({
+  async findOne(id: string, userId?: string) {
+    const movie = await this.movieRepository.findOne({
       where: { content: { id } },
       relations: {
         content: {
@@ -57,6 +61,19 @@ export class MoviesService {
         }
       }
     });
+
+    if (!movie) {
+      return movie;
+    }
+
+    const [isInWishlist, isInFavorites] = userId
+      ? await Promise.all([
+        this.wishlistService.isContentInWishlist(userId, id),
+        this.favoriteService.isContentInFavorites(userId, id)
+      ])
+      : [false, false];
+
+    return { ...movie, isInWishlist, isInFavorites };
   }
 
 }

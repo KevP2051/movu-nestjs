@@ -3,8 +3,7 @@ import { AxiosAdapter } from 'src/common/adapters/axios.adapter';
 import { TmdbMovieListResponse, TmdbSeriesGenresResponse, TmdbMovieGenresResponse } from './interfaces';
 import { TmdbMovieMapper } from './mappers/tmdb-movie.mapper';
 import { TmdbGenresMapper } from './mappers/tmdb-genres.mapper';
-import { TmdbMovieCreditsResponse } from './interfaces/tmdb-movie-credits.response';
-import { TmdbCreditMapper } from './mappers/tmdb-credit.mapper';
+import { TmdbMovieDetailsResponse, TmdbMovieResponse } from './interfaces/tmdb-movie-response';
 
 @Injectable()
 export class TmdbService {
@@ -26,7 +25,7 @@ export class TmdbService {
 
     async getMovie(tmdbId: number) {
 
-        return await this.http.get<any>(`${this.baseUrl}/movie/${tmdbId}?api_key=${this.apiKey}`, { headers: this.headers });
+        return TmdbMovieMapper.toMovie(await this.http.get<TmdbMovieResponse>(`${this.baseUrl}/movie/${tmdbId}?api_key=${this.apiKey}`, { headers: this.headers }));
     }
 
     async getPopularMovies(page: number) {
@@ -48,8 +47,10 @@ export class TmdbService {
         return TmdbGenresMapper.toSeriesGenre(await this.http.get<TmdbSeriesGenresResponse>(`${this.baseUrl}/genre/tv/list?api_key=${this.apiKey}`, { headers: this.headers }));
     }
 
-    async getMovieCredits(tmdbId: number) {
-        return TmdbCreditMapper.toContentCreditEntity(await this.http.get<TmdbMovieCreditsResponse>(`${this.baseUrl}/movie/${tmdbId}/credits?api_key=${this.apiKey}`, { headers: this.headers }));
+    async getMovieWithCredits(tmdbId: number) {
+        const url = `${this.baseUrl}/movie/${tmdbId}?append_to_response=credits`;
+        const data = await this.http.get<TmdbMovieDetailsResponse>(url, { headers: this.headers });
+        return TmdbMovieMapper.toMovieWithCredits(data);
     }
 
     async getSeriesCast(tmdbId: number) {

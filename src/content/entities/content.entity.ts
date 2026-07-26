@@ -2,7 +2,9 @@ import { Column, Entity, PrimaryGeneratedColumn, TableInheritance, ManyToMany, J
 import { GenreEntity } from "../../genres/entities/genre.entity";
 import { ContentTypeEnum } from "src/common/enums/content-type.enum";
 import { ContentCreditEntity } from "./content-credit";
-import { Review } from "src/review/entities/review.entity";
+import { ReviewEntity } from "src/review/entities/review.entity";
+import { WishlistEntity } from "src/wishlist/entities/wishlist.entity";
+import { FavoriteEntity } from "src/favorite/entities/favorite.entity";
 
 @Entity()
 export class ContentEntity {
@@ -55,9 +57,7 @@ export class ContentEntity {
     })
     adult: boolean;
 
-    @ManyToMany(() => GenreEntity, (genre) => genre.contents)
-    @JoinTable()
-    genres: GenreEntity[];
+
 
     @Column({
         type: 'enum',
@@ -78,6 +78,12 @@ export class ContentEntity {
     })
     reviewsCount: number;
 
+    @Column({
+        type: 'float',
+        default: 0
+    })
+    averageRating: number;
+
     @CreateDateColumn()
     createdAt: Date;
 
@@ -88,6 +94,17 @@ export class ContentEntity {
     @OneToMany(() => ContentCreditEntity, (contentCredit) => contentCredit.content)
     contentCredits: ContentCreditEntity[];
 
-    @OneToMany(() => Review, (review) => review.content)
-    reviews: Review[];
+    @OneToMany(() => ReviewEntity, (review) => review.content)
+    reviews: ReviewEntity[];
+
+
+    @OneToMany(() => WishlistEntity, (wishlist) => wishlist.content)
+    wishlist: WishlistEntity[];
+
+    @OneToMany(() => FavoriteEntity, (favorite) => favorite.content)
+    favorite: FavoriteEntity[];
+
+    @ManyToMany(() => GenreEntity, (genre) => genre.contents)
+    @JoinTable()
+    genres: GenreEntity[];
 }

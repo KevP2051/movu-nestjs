@@ -4,6 +4,8 @@ import { Auth } from 'src/auth/decorators';
 import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
 import { SeedUsersDto } from './dto/seed-users.dto';
 import { SeedReviewsDto } from './dto/seed-reviews.dto';
+import { SeedWishlistDto } from './dto/seed-wishlist.dto';
+import { SeedFavoritesDto } from './dto/seed-favorites.dto';
 import { SeedDatabaseDto } from './dto/seed-database.dto';
 
 @Controller('seed')
@@ -18,6 +20,16 @@ export class SeedController {
   @Post('reviews')
   seedReviews(@Body() seedReviewsDto: SeedReviewsDto) {
     return this.seedService.seedReviews(seedReviewsDto);
+  }
+
+  @Post('wishlist')
+  seedWishlist(@Body() seedWishlistDto: SeedWishlistDto) {
+    return this.seedService.seedWishlist(seedWishlistDto);
+  }
+
+  @Post('favorites')
+  seedFavorites(@Body() seedFavoritesDto: SeedFavoritesDto) {
+    return this.seedService.seedFavorites(seedFavoritesDto);
   }
 
   @Post()

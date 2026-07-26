@@ -14,6 +14,8 @@ import { GenresModule } from './genres/genres.module';
 import { PersonModule } from './person/person.module';
 import { ReviewModule } from './review/review.module';
 import { SeedModule } from './seed/seed.module';
+import { WishlistModule } from './wishlist/wishlist.module';
+import { FavoriteModule } from './favorite/favorite.module';
 
 @Module({
   imports: [
@@ -49,6 +51,8 @@ import { SeedModule } from './seed/seed.module';
     PersonModule,
     ReviewModule,
     SeedModule,
+    WishlistModule,
+    FavoriteModule,
   ],
 })
 export class AppModule { }

@@ -1,20 +1,18 @@
-import { TmdbCreditMember } from "../interfaces/tmdb-credit-member.interface";
+import { CreateContentCreditDto } from "src/content/dto/create-content-credit.dto";
 import { TmdbCast, TmdbMovieCreditsResponse } from "../interfaces/tmdb-movie-credits.response";
 
 export class TmdbCreditMapper {
 
-    static toContentCreditEntity(data: TmdbMovieCreditsResponse): TmdbCreditMember[] {
+    static toContentCredits(data: TmdbMovieCreditsResponse): CreateContentCreditDto[] {
 
-        const tmdbCastMembers: TmdbCreditMember[] = data.cast.map((creditMember: TmdbCast) => ({
-
-            tmdbId: creditMember.id,
+        return data.cast.map((creditMember: TmdbCast) => ({
             character: creditMember.character,
-            name: creditMember.name,
-            knownForDepartment: creditMember.known_for_department,
-            profilePath: creditMember.profile_path ?? undefined
+            person: {
+                tmdbId: creditMember.id,
+                name: creditMember.name,
+                knownForDepartment: creditMember.known_for_department,
+                profilePath: creditMember.profile_path ?? undefined,
+            },
         }));
-
-        return tmdbCastMembers;
-
     }
 }

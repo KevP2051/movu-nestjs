@@ -17,69 +17,89 @@ export class ContentFactoryService {
         private readonly genresService: GenresService,
     ) { }
 
-    async createOrUpdateMovieWithContent(createContentDto: CreateContentDto) {
-        const queryRunner = this.dataSource.createQueryRunner();
-
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-
+    async createOrUpdateMovie(input: CreateContentDto): Promise<MovieEntity> {
         try {
-            const genres = await this.genresService.findAllByTmdbIds(
-                createContentDto.genreIds!,
-                createContentDto.type || ContentTypeEnum.MOVIE,
-            );
-
-            let content = await queryRunner.manager.findOne(ContentEntity, {
-                where: { tmdbId: createContentDto.tmdbId },
-                relations: ['genres'],
+            return await this.dataSource.transaction(async (manager) => {
+                const content = await this.upsertContent(manager, input);
+                const movie = await this.upsertMovie(manager, content, input.runtime);
+                await this.upsertCredits(manager, content, input.credits ?? []);
+                return movie;
             });
-
-            if (content) {
-                queryRunner.manager.merge(ContentEntity, content, {
-                    ...createContentDto,
-                    genres
-                });
-
-            } else {
-                content = queryRunner.manager.create(ContentEntity, {
-                    ...createContentDto,
-                    genres,
-                    slug: slugify(createContentDto.title, { lower: true, strict: true }),
-                });
-            }
-            const savedContent = await queryRunner.manager.save(content);
-
-            let movie = await queryRunner.manager.findOne(MovieEntity, {
-                where: { id: savedContent.id as any },
-            });
-
-            if (!movie) {
-                movie = queryRunner.manager.create(MovieEntity, {
-                    id: savedContent.id as any,
-                    content: savedContent,
-                });
-                movie = await queryRunner.manager.save(movie);
-            }
-
-            for (const credit of createContentDto.credits || []) {
-                await this.createOrUpdateCredit(queryRunner.manager, savedContent, credit);
-            }
-
-            await queryRunner.commitTransaction();
-            return movie;
         } catch (error: any) {
-            await queryRunner.rollbackTransaction();
-            throw new InternalServerErrorException('Failed to create or update movie and content', error.message);
-        } finally {
-            await queryRunner.release();
+            throw new InternalServerErrorException(
+                'Failed to create or update movie and content',
+                error.message,
+            );
         }
     }
 
-    private async createOrUpdateCredit(
+    private async upsertContent(
+        manager: EntityManager,
+        input: CreateContentDto,
+    ): Promise<ContentEntity> {
+        const genres = await this.genresService.findAllByTmdbIds(
+            input.genreIds ?? [],
+            input.type ?? ContentTypeEnum.MOVIE,
+        );
+
+        const data = {
+            tmdbId: input.tmdbId,
+            title: input.title,
+            overview: input.overview,
+            releaseDate: input.releaseDate,
+            posterPath: input.posterPath,
+            popularity: input.popularity,
+            adult: input.adult,
+            type: input.type ?? ContentTypeEnum.MOVIE,
+            genres,
+        };
+
+        const existing = await manager.findOne(ContentEntity, {
+            where: { tmdbId: input.tmdbId },
+        });
+
+        const content = manager.create(ContentEntity, {
+            ...data,
+            id: existing?.id,
+            slug: existing?.slug ?? slugify(input.title, { lower: true, strict: true }),
+        });
+
+        return manager.save(content);
+    }
+
+    private async upsertMovie(
+        manager: EntityManager,
+        content: ContentEntity,
+        runtime?: number,
+    ): Promise<MovieEntity> {
+        const existing = await manager.findOne(MovieEntity, {
+            where: { id: content.id },
+        });
+
+        const movie = manager.create(MovieEntity, {
+            id: content.id,
+            content,
+            runtime: runtime ?? existing?.runtime ?? 0,
+        });
+
+        return manager.save(movie);
+    }
+
+    private async upsertCredits(
+        manager: EntityManager,
+        content: ContentEntity,
+        credits: CreateContentCreditDto[],
+    ): Promise<void> {
+        for (const credit of credits) {
+            await this.upsertCredit(manager, content, credit);
+        }
+    }
+
+    private async upsertCredit(
         manager: EntityManager,
         content: ContentEntity,
         credit: CreateContentCreditDto,
-    ) {
+    ): Promise<void> {
         let person = await manager.findOne(PersonEntity, {
             where: { tmdbId: credit.person.tmdbId },
         });
@@ -106,5 +126,4 @@ export class ContentFactoryService {
         }
         await manager.save(contentCredit);
     }
-
 }

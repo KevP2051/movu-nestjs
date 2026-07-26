@@ -3,6 +3,8 @@ import { ContentService } from './content.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { ContentTypeEnum } from 'src/common/enums/content-type.enum';
+import { OptionalAuth, GetUser } from 'src/auth/decorators';
+import { User } from 'src/users/entities/user.entity';
 
 @Controller('content')
 export class ContentController {
@@ -19,7 +21,8 @@ export class ContentController {
   }
 
   @Get('home')
-  getHomeContent(@Query('contentType', new ParseEnumPipe(ContentTypeEnum)) contentType: ContentTypeEnum) {
-    return this.contentService.getHomeContent(contentType);
+  @OptionalAuth()
+  getHomeContent(@Query('contentType', new ParseEnumPipe(ContentTypeEnum)) contentType: ContentTypeEnum, @GetUser() user: User) {
+    return this.contentService.getHomeContent(contentType, user?.id);
   }
 }

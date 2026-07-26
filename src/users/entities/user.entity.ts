@@ -2,7 +2,9 @@ import { BeforeInsert, BeforeUpdate, Column, Entity, OneToMany, PrimaryGenerated
 import * as bcrypt from 'bcrypt';
 import { VerificationCode } from "src/auth/entities/verification-code.entity";
 import { Exclude } from "class-transformer";
-import { Review } from "src/review/entities/review.entity";
+import { ReviewEntity } from "src/review/entities/review.entity";
+import { WishlistEntity } from "src/wishlist/entities/wishlist.entity";
+import { FavoriteEntity } from "src/favorite/entities/favorite.entity";
 
 @Entity()
 export class User {
@@ -43,11 +45,11 @@ export class User {
     })
     isActive: boolean;
 
-    @OneToMany(() => Review, review => review.user, {
+    @OneToMany(() => ReviewEntity, review => review.user, {
         cascade: true,
         eager: false
     })
-    reviews: Review[];
+    reviews: ReviewEntity[];
 
     //TODO: Implement code verification
     @Exclude()
@@ -57,7 +59,17 @@ export class User {
     })
     verificationCodes: VerificationCode[];
 
+    @OneToMany(() => WishlistEntity, wishlist => wishlist.users, {
+        cascade: true,
+        eager: false
+    })
+    wishlist: WishlistEntity[];
 
+    @OneToMany(() => FavoriteEntity, favorite => favorite.users, {
+        cascade: true,
+        eager: false
+    })
+    favorite: FavoriteEntity[];
 
     @BeforeInsert()
     @BeforeUpdate()

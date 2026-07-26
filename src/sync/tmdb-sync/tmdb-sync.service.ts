@@ -68,32 +68,11 @@ export class TmdbSyncService {
 
     for (let currentPage = page; currentPage <= maxPages; currentPage++) {
       try {
-        const movies = await this.tmdbService.getPopularMovies(currentPage);
+        const populars = await this.tmdbService.getPopularMovies(currentPage);
 
-
-        for (const movie of movies) {
-
-          const credits = await this.tmdbService.getMovieCredits(movie.tmdbId);
-          const content = await this.contentFactory.createOrUpdateMovieWithContent({
-            tmdbId: movie.tmdbId,
-            title: movie.title,
-            overview: movie.overview,
-            releaseDate: movie.releaseDate,
-            posterPath: movie.posterPath,
-            popularity: movie.popularity,
-            adult: movie.adult,
-            genreIds: (movie as any).genreIds || [],
-            credits: credits.map((creditMember) => ({
-              character: creditMember.character,
-              person: {
-                tmdbId: creditMember.tmdbId,
-                name: creditMember.name,
-                profilePath: creditMember.profilePath,
-                knownForDepartment: creditMember.knownForDepartment,
-              },
-            })),
-          });
-
+        for (const popular of populars) {
+          const movie = await this.tmdbService.getMovieWithCredits(popular.tmdbId);
+          await this.contentFactory.createOrUpdateMovie(movie);
           totalSynced++;
         }
 

@@ -1,7 +1,27 @@
 import { Movie } from "src/common/interfaces/movie.interface";
+import { CreateContentDto } from "src/content/dto/create-content.dto";
 import { TmdbMovieListResponse } from "../interfaces";
+import { TmdbMovieDetailsResponse, TmdbMovieResponse } from "../interfaces/tmdb-movie-response";
+import { TmdbCreditMapper } from "./tmdb-credit.mapper";
 
 export class TmdbMovieMapper {
+
+    static toMovieWithCredits(data: TmdbMovieDetailsResponse): CreateContentDto {
+        return {
+            tmdbId: data.id,
+            title: data.title,
+            overview: data.overview,
+            releaseDate: data.release_date,
+            posterPath: data.poster_path,
+            backdropPath: data.backdrop_path,
+            popularity: data.popularity,
+
+            adult: data.adult,
+            genreIds: data.genres?.map((genre) => genre.id) ?? [],
+            runtime: data.runtime,
+            credits: TmdbCreditMapper.toContentCredits(data.credits),
+        };
+    }
 
     static toMovieList(data: TmdbMovieListResponse): Movie[] {
 
@@ -27,5 +47,19 @@ export class TmdbMovieMapper {
         return movies;
     }
 
+    static toMovie(data: TmdbMovieResponse): Movie {
+        const movie: Movie = {
+            tmdbId: data.id,
+            title: data.title,
+            overview: data.overview,
+            runtime: data.runtime,
+            releaseDate: data.release_date,
+            posterPath: data.poster_path,
+            popularity: data.popularity,
+            adult: data.adult
+        };
+
+        return movie;
+    }
 
 }

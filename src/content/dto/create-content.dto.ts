@@ -32,6 +32,9 @@ export class CreateContentDto {
     @IsString()
     posterPath: string;
 
+    @IsString()
+    backdropPath: string;
+
     @IsOptional()
     @IsNumber()
     @IsPositive()
@@ -46,6 +49,12 @@ export class CreateContentDto {
     @IsBoolean()
     adult?: boolean;
 
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    runtime?: number;
+
+    @IsOptional()
     @IsEnum(ContentTypeEnum)
     type?: ContentTypeEnum;
 

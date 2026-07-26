@@ -6,6 +6,8 @@ import { ContentEntity } from './entities/content.entity';
 import { Repository } from 'typeorm';
 import { GenresService } from 'src/genres/genres.service';
 import { ContentTypeEnum } from 'src/common/enums/content-type.enum';
+import { WishlistService } from 'src/wishlist/wishlist.service';
+import { FavoriteService } from 'src/favorite/favorite.service';
 
 @Injectable()
 export class ContentService {
@@ -13,7 +15,9 @@ export class ContentService {
   constructor(
     @InjectRepository(ContentEntity)
     private readonly contentRepository: Repository<ContentEntity>,
-    private readonly genresService: GenresService
+    private readonly genresService: GenresService,
+    private readonly wishlistService: WishlistService,
+    private readonly favoriteService: FavoriteService
   ) { }
 
 
@@ -27,22 +31,37 @@ export class ContentService {
   }
 
 
-  async getHomeContent(contentType: ContentTypeEnum) {
+  async getHomeContent(contentType: ContentTypeEnum, userId?: string) {
 
-    const genres = await this.genresService.findAllByType(contentType);
+    // Todo el contenido del tipo (con sus géneros) en UNA sola consulta,
+    // en lugar de una consulta por cada género.
+    const [genres, contents] = await Promise.all([
+      this.genresService.findAllByType(contentType),
+      this.contentRepository.find({
+        where: { type: contentType },
+        relations: { genres: true }
+      })
+    ]);
 
-    const contentByGenre = await Promise.all(genres.map(async (genre) => {
-      const content = await this.contentRepository.createQueryBuilder('content')
-        .leftJoinAndSelect('content.genres', 'genres')
-        .where('genres.id = :genreId', { genreId: genre.id })
-        .andWhere('content.type = :contentType', { contentType })
-        .getMany();
+    const contentIds = contents.map((content) => content.id);
 
-      return {
-        genre: genre.name,
-        content: content
-      };
+    // Una consulta para wishlist y otra para favoritos (no una por contenido).
+    const [wishlistedIds, favoritedIds] = userId
+      ? await Promise.all([
+        this.wishlistService.getWishlistedContentIds(userId, contentIds),
+        this.favoriteService.getFavoritedContentIds(userId, contentIds)
+      ])
+      : [new Set<string>(), new Set<string>()];
 
+    const contentByGenre = genres.map((genre) => ({
+      genre: genre.name,
+      content: contents
+        .filter((content) => content.genres.some((g) => g.id === genre.id))
+        .map((content) => ({
+          ...content,
+          isInWishlist: wishlistedIds.has(content.id),
+          isInFavorites: favoritedIds.has(content.id)
+        }))
     }));
 
     return { contentByGenre };
@@ -76,6 +95,21 @@ export class ContentService {
   }
 
   findReviewsByContent(contentId: string) {
+
+  }
+
+  async updateRatingStats(contentId: string, newRating: number, reviewsCount: number) {
+    const content = await this.contentRepository.preload({
+      id: contentId,
+      averageRating: newRating,
+      reviewsCount: reviewsCount
+    });
+
+    if (!content) {
+      throw new NotFoundException(`Content with id ${contentId} not found`);
+    }
+
+    await this.contentRepository.save(content);
 
   }
 }

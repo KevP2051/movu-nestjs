@@ -2,7 +2,7 @@ import { ConflictException, ForbiddenException, Injectable, NotFoundException } 
 import { CreateReviewDto } from './dto/create-review.dto';
 import { UpdateReviewDto } from './dto/update-review.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Review } from './entities/review.entity';
+import { ReviewEntity } from './entities/review.entity';
 import { Repository } from 'typeorm';
 import { ContentService } from 'src/content/content.service';
 import { FindReviewsDto } from './dto/find-reviews.dto';
@@ -12,8 +12,8 @@ import { ReviewSortEnum } from './enums/review-sort.enum';
 export class ReviewService {
 
   constructor(
-    @InjectRepository(Review)
-    private readonly reviewRepository: Repository<Review>,
+    @InjectRepository(ReviewEntity)
+    private readonly reviewRepository: Repository<ReviewEntity>,
     private readonly contentService: ContentService
 
   ) { }
@@ -29,7 +29,9 @@ export class ReviewService {
     }
 
     const review = this.reviewRepository.create({ ...createReviewDto, user: { id: userId }, content: { id: createReviewDto.contentId } });
-    return await this.reviewRepository.save(review);
+    const savedReview = await this.reviewRepository.save(review);
+    await this.updateContentRatingStats(createReviewDto.contentId);
+    return savedReview;
   }
 
   findAll() {
@@ -128,9 +130,9 @@ export class ReviewService {
 
     await this.reviewRepository.save(reviewToUpdate);
 
+    await this.updateContentRatingStats(reviewToUpdate.content.id);
+
     return { message: `Review with id ${id} has been updated` }
-
-
   }
 
   async remove(id: string, userId: string) {
@@ -145,8 +147,33 @@ export class ReviewService {
     }
 
     await this.reviewRepository.remove(reviewToDelete);
-
+    await this.updateContentRatingStats(reviewToDelete.content.id);
     return { message: `Review with id ${id} has been deleted` };
 
+  }
+
+  private async updateContentRatingStats(contentId: string) {
+    const { average, count } = await this.calculateRatingStats(contentId);
+
+    await this.contentService.updateRatingStats(
+      contentId,
+      average,
+      count,
+    );
+  }
+
+
+  private async calculateRatingStats(contentId: string) {
+    const { average, count } = await this.reviewRepository
+      .createQueryBuilder('review')
+      .select('AVG(review.rating)', 'average')
+      .addSelect('COUNT(review.id)', 'count')
+      .where('review.contentId = :contentId', { contentId })
+      .getRawOne();
+
+    return {
+      average: Number(average) || 0,
+      count: Number(count),
+    };
   }
 }

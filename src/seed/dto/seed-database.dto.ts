@@ -16,4 +16,18 @@ export class SeedDatabaseDto {
     @Min(1)
     @Max(2000)
     reviewsCount?: number = 50;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @Max(2000)
+    wishlistCount?: number = 50;
+
+    @IsOptional()
+    @Type(() => Number)
+    @IsInt()
+    @Min(1)
+    @Max(2000)
+    favoritesCount?: number = 50;
 }
