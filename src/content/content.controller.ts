@@ -5,6 +5,7 @@ import { UpdateContentDto } from './dto/update-content.dto';
 import { ContentTypeEnum } from 'src/common/enums/content-type.enum';
 import { OptionalAuth, GetUser } from 'src/auth/decorators';
 import { User } from 'src/users/entities/user.entity';
+import { FindContentDto } from './dto/find-content.dto';
 
 @Controller('content')
 export class ContentController {
@@ -16,8 +17,8 @@ export class ContentController {
   }
 
   @Get()
-  findAll() {
-    return this.contentService.findAll();
+  findAll(@Query() query: FindContentDto) {
+    return this.contentService.findAll(query);
   }
 
   @Get('home')

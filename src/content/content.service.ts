@@ -8,6 +8,8 @@ import { GenresService } from 'src/genres/genres.service';
 import { ContentTypeEnum } from 'src/common/enums/content-type.enum';
 import { WishlistService } from 'src/wishlist/wishlist.service';
 import { FavoriteService } from 'src/favorite/favorite.service';
+import { FindContentDto } from './dto/find-content.dto';
+import { ContentSortEnum } from './enums/content-sort.enum';
 
 @Injectable()
 export class ContentService {
@@ -69,8 +71,63 @@ export class ContentService {
   }
 
 
-  findAll() {
-    return `This action returns all content`;
+  async findAll(findContentDto: FindContentDto) {
+
+    const { contentType, sortBy, genre, page = 1, limit = 20 } = findContentDto;
+
+    const query = this.contentRepository.createQueryBuilder('content')
+      .leftJoinAndSelect('content.genres', 'genre');
+
+    if (contentType) {
+      query.andWhere('content.type = :contentType', { contentType });
+    }
+
+    if (genre && genre !== 'all') {
+      query.andWhere('genre.name = :genre', { genre });
+    }
+
+    switch (sortBy) {
+      case ContentSortEnum.NEWEST:
+        query.orderBy('content.releaseDate', 'DESC');
+        break;
+      case ContentSortEnum.OLDEST:
+        query.orderBy('content.releaseDate', 'ASC');
+        break;
+      case ContentSortEnum.HIGHEST_RATING:
+        query.orderBy('content.averageRating', 'DESC');
+        break;
+      case ContentSortEnum.LOWEST_RATING:
+        query.orderBy('content.averageRating', 'ASC');
+        break;
+      case ContentSortEnum.MOST_REVIEWED:
+        query.orderBy('content.reviewsCount', 'DESC');
+        break;
+      case ContentSortEnum.LEAST_REVIEWED:
+        query.orderBy('content.reviewsCount', 'ASC');
+        break;
+      case ContentSortEnum.ALPHABETICAL:
+        query.orderBy('content.title', 'ASC');
+        break;
+      default:
+        query.orderBy('content.title', 'ASC');
+    }
+
+    query
+      .skip((page - 1) * limit)
+      .take(limit);
+
+    const [contents, total] = await query.getManyAndCount();
+
+    return {
+      data: contents,
+      pagination: {
+        page,
+        limit,
+        totalItems: total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+
   }
 
   async findOne(contentId: string) {

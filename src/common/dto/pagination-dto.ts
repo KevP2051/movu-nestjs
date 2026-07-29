@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsPositive, Max } from "class-validator";
+import { IsNumber, IsOptional, IsPositive, Max, Min } from "class-validator";
 
 export class PaginationDto {
 
@@ -6,15 +6,13 @@ export class PaginationDto {
     @IsNumber()
     @IsPositive()
     @IsOptional()
-    @Max(process.env.MOVIES_MAX_PAGE_SIZE ? parseInt(process.env.MOVIES_MAX_PAGE_SIZE) : 20, { message: 'Limit cannot exceed 20' })
+    @Min(1)
+    @Max(100)
     limit?: number;
 
     @IsNumber()
     @IsPositive()
     @IsOptional()
     page?: number;
-
-
-
 
 }
