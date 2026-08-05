@@ -73,7 +73,7 @@ export class ContentService {
 
   async findAll(findContentDto: FindContentDto) {
 
-    const { contentType, sortBy, genre, page = 1, limit = 20 } = findContentDto;
+    const { contentType, sortBy, genreSlug, page = 1, limit = 20 } = findContentDto;
 
     const query = this.contentRepository.createQueryBuilder('content')
       .leftJoinAndSelect('content.genres', 'genre');
@@ -82,8 +82,8 @@ export class ContentService {
       query.andWhere('content.type = :contentType', { contentType });
     }
 
-    if (genre && genre !== 'all') {
-      query.andWhere('genre.name = :genre', { genre });
+    if (genreSlug && genreSlug !== 'all') {
+      query.andWhere('genre.slug = :genreSlug', { genreSlug });
     }
 
     switch (sortBy) {

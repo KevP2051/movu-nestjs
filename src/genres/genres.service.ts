@@ -5,6 +5,7 @@ import { GenreEntity } from './entities/genre.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContentTypeEnum } from 'src/common/enums/content-type.enum';
+import slugify from 'slugify';
 
 @Injectable()
 export class GenresService {
@@ -22,10 +23,10 @@ export class GenresService {
     const existingGenre = await this.genreRepository.findOneBy({ tmdbId: genreData.tmdbId });
 
     if (existingGenre) {
-      return await this.genreRepository.save({ ...existingGenre, ...genreData });
+      return await this.genreRepository.save({ ...existingGenre, ...genreData, slug: existingGenre.slug || slugify(genreData.name, { lower: true, strict: true }) });
     }
 
-    const genre = this.genreRepository.create(genreData);
+    const genre = this.genreRepository.create({ ...genreData, slug: slugify(genreData.name, { lower: true, strict: true }) });
     await this.genreRepository.save(genre);
 
   }
@@ -45,6 +46,10 @@ export class GenresService {
 
   findOneByType(tmdbId: number, contentType: ContentTypeEnum) {
     return this.genreRepository.findOneBy({ tmdbId: tmdbId, contentType: contentType });
+  }
+
+  findBySlug(slug: string, contentType: ContentTypeEnum) {
+    return this.genreRepository.findOneBy({ slug: slug, contentType: contentType });
   }
 
   update(tmdbId: number, contentType: ContentTypeEnum, updateGenreDto: UpdateGenreDto) {

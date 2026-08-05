@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Like, Repository } from 'typeorm';
+import { Like, ObjectLiteral, Repository } from 'typeorm';
 import { faker } from '@faker-js/faker';
 import { User } from 'src/users/entities/user.entity';
 import { ReviewEntity } from 'src/review/entities/review.entity';
@@ -64,8 +64,11 @@ export class SeedService {
 
         const createdReviews = await this.reviewRepository.save(reviews);
 
+        const contentsWithStatsUpdated = await this.recalculateContentRatingStats();
+
         return {
             totalCreated: createdReviews.length,
+            contentsWithStatsUpdated,
             message: `Successfully seeded ${createdReviews.length} reviews`
         };
     }
@@ -132,38 +135,87 @@ export class SeedService {
 
         this.ensureSeedingIsAllowed();
 
-        const deletedReviews = await this.reviewRepository
-            .createQueryBuilder('review')
-            .leftJoin('review.user', 'user')
-            .where('user.email LIKE :emailPattern', { emailPattern: `%@${SEED_EMAIL_DOMAIN}` })
-            .delete()
-            .execute();
+        // A DELETE query builder drops any join but keeps the WHERE, so filtering
+        // on a joined user alias produced invalid SQL. Resolve the seeded users
+        // first, then delete their rows by foreign key.
+        const seededUsers = await this.userRepository.find({
+            where: { email: Like(`%@${SEED_EMAIL_DOMAIN}`) },
+            select: { id: true }
+        });
 
-        const deletedWishlistItems = await this.wishlistRepository
-            .createQueryBuilder('wishlist')
-            .leftJoin('wishlist.users', 'user')
-            .where('user.email LIKE :emailPattern', { emailPattern: `%@${SEED_EMAIL_DOMAIN}` })
-            .delete()
-            .execute();
+        if (seededUsers.length === 0) {
+            return {
+                deletedReviews: 0,
+                deletedWishlistItems: 0,
+                deletedFavorites: 0,
+                deletedUsers: 0,
+                contentsWithStatsUpdated: 0,
+                message: 'There was no seeded data to clear'
+            };
+        }
 
-        const deletedFavorites = await this.favoriteRepository
-            .createQueryBuilder('favorite')
-            .leftJoin('favorite.users', 'user')
-            .where('user.email LIKE :emailPattern', { emailPattern: `%@${SEED_EMAIL_DOMAIN}` })
-            .delete()
-            .execute();
+        const userIds = seededUsers.map(({ id }) => id);
+
+        const deletedReviews = await this.deleteByUserIds(this.reviewRepository, 'userId', userIds);
+        const deletedWishlistItems = await this.deleteByUserIds(this.wishlistRepository, 'usersId', userIds);
+        const deletedFavorites = await this.deleteByUserIds(this.favoriteRepository, 'usersId', userIds);
 
         const deletedUsers = await this.userRepository.delete({
             email: Like(`%@${SEED_EMAIL_DOMAIN}`)
         });
+
+        const contentsWithStatsUpdated = await this.recalculateContentRatingStats();
 
         return {
             deletedReviews: deletedReviews.affected ?? 0,
             deletedWishlistItems: deletedWishlistItems.affected ?? 0,
             deletedFavorites: deletedFavorites.affected ?? 0,
             deletedUsers: deletedUsers.affected ?? 0,
+            contentsWithStatsUpdated,
             message: 'Successfully cleared previously seeded data'
         };
+    }
+
+    private deleteByUserIds(repository: Repository<ObjectLiteral>, userColumn: string, userIds: string[]) {
+
+        return repository
+            .createQueryBuilder()
+            .delete()
+            .where(`"${userColumn}" IN (:...userIds)`, { userIds })
+            .execute();
+    }
+
+    /**
+     * Seeding writes reviews straight through the repository, bypassing
+     * ReviewService, which is what keeps content.reviewsCount / averageRating
+     * in sync. Recompute them from the reviews table instead.
+     */
+    private async recalculateContentRatingStats() {
+
+        const stats = await this.reviewRepository
+            .createQueryBuilder('review')
+            .select('review.contentId', 'contentId')
+            .addSelect('AVG(review.rating)', 'average')
+            .addSelect('COUNT(review.id)', 'count')
+            .groupBy('review.contentId')
+            .getRawMany<{ contentId: string; average: string; count: string }>();
+
+        await this.contentRepository
+            .createQueryBuilder()
+            .update()
+            .set({ reviewsCount: 0, averageRating: 0 })
+            .execute();
+
+        // ponytail: one UPDATE per reviewed content, fine at seed volumes.
+        // Switch to a single correlated-subquery UPDATE if it gets slow.
+        for (const { contentId, average, count } of stats) {
+            await this.contentRepository.update(contentId, {
+                reviewsCount: Number(count),
+                averageRating: Number(average)
+            });
+        }
+
+        return stats.length;
     }
 
     private buildFakeUser(index: number): User {

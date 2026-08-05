@@ -1,0 +1,374 @@
+{
+  "info": {
+    "name": "Movu API",
+    "description": "Auto-generated from movu-nestjs controllers. Base prefix: /api/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000/api/v1" },
+    { "key": "token", "value": "" },
+    { "key": "contentId", "value": "" },
+    { "key": "reviewId", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "personId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"userName\": \"john.doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"Password1\"\n}" },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": [
+                "if (pm.response.code === 200 || pm.response.code === 201) {",
+                "  const body = pm.response.json();",
+                "  if (body.token) pm.collectionVariables.set('token', body.token);",
+                "}"
+              ]
+            }
+          }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"Password1\"\n}" },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        {
+          "name": "Check Status",
+          "request": { "method": "GET", "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{token}}" }] }, "url": "{{baseUrl}}/auth/check-status" }
+        },
+        {
+          "name": "Request Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\"\n}" },
+            "url": "{{baseUrl}}/auth/reset-password/request"
+          }
+        },
+        {
+          "name": "Verify Password Reset Code",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\",\n  \"code\": \"123456\"\n}" },
+            "url": "{{baseUrl}}/auth/reset-password/verify"
+          }
+        },
+        {
+          "name": "Complete Password Reset",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"john@example.com\",\n  \"code\": \"123456\",\n  \"newPassword\": \"NewPassword1\"\n}" },
+            "url": "{{baseUrl}}/auth/reset-password/complete"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        { "name": "Find All", "request": { "method": "GET", "url": "{{baseUrl}}/users" } },
+        { "name": "Find One", "request": { "method": "GET", "url": "{{baseUrl}}/users/{{userId}}" } },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"userName\": \"john.doe2\"\n}" },
+            "url": "{{baseUrl}}/users/{{userId}}"
+          }
+        },
+        { "name": "Remove", "request": { "method": "DELETE", "url": "{{baseUrl}}/users/{{userId}}" } }
+      ]
+    },
+    {
+      "name": "Content",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tmdbId\": 550,\n  \"title\": \"Fight Club\",\n  \"overview\": \"An insomniac office worker...\",\n  \"releaseDate\": \"1999-10-15\",\n  \"posterPath\": \"/poster.jpg\",\n  \"backdropPath\": \"/backdrop.jpg\",\n  \"popularity\": 61.4,\n  \"genreIds\": [18, 53],\n  \"adult\": false,\n  \"runtime\": 139,\n  \"type\": \"movie\",\n  \"credits\": [\n    {\n      \"character\": \"Tyler Durden\",\n      \"person\": {\n        \"tmdbId\": 287,\n        \"name\": \"Brad Pitt\",\n        \"knownForDepartment\": \"Acting\",\n        \"profilePath\": \"/pitt.jpg\"\n      }\n    }\n  ]\n}"
+            },
+            "url": "{{baseUrl}}/content"
+          }
+        },
+        {
+          "name": "Find All (filters + pagination)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/content?contentType=movie&sortBy=newest&genreSlug=all&page=1&limit=20",
+              "host": ["{{baseUrl}}"], "path": ["content"],
+              "query": [
+                { "key": "contentType", "value": "movie" },
+                { "key": "sortBy", "value": "newest" },
+                { "key": "genreSlug", "value": "all" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Home Content",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/content/home?contentType=movie",
+              "host": ["{{baseUrl}}"], "path": ["content", "home"],
+              "query": [{ "key": "contentType", "value": "movie" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        { "name": "Find Movie Details", "request": { "method": "GET", "url": "{{baseUrl}}/movies/{{contentId}}" } }
+      ]
+    },
+    {
+      "name": "Genres",
+      "item": [
+        {
+          "name": "Find All / By Content Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/genres?contentType=movie",
+              "host": ["{{baseUrl}}"], "path": ["genres"],
+              "query": [{ "key": "contentType", "value": "movie" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Person",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tmdbId\": 287,\n  \"name\": \"Brad Pitt\",\n  \"knownForDepartment\": \"Acting\",\n  \"profilePath\": \"/pitt.jpg\"\n}" },
+            "url": "{{baseUrl}}/person"
+          }
+        },
+        { "name": "Find All", "request": { "method": "GET", "url": "{{baseUrl}}/person" } },
+        { "name": "Find One", "request": { "method": "GET", "url": "{{baseUrl}}/person/{{personId}}" } },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Brad Pitt Updated\"\n}" },
+            "url": "{{baseUrl}}/person/{{personId}}"
+          }
+        },
+        { "name": "Remove", "request": { "method": "DELETE", "url": "{{baseUrl}}/person/{{personId}}" } }
+      ]
+    },
+    {
+      "name": "Review",
+      "item": [
+        {
+          "name": "Find By Content (filters + pagination)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/review/{{contentId}}?sort=newest&page=1&limit=20&rating=5",
+              "host": ["{{baseUrl}}"], "path": ["review", "{{contentId}}"],
+              "query": [
+                { "key": "sort", "value": "newest" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "rating", "value": "5" }
+              ]
+            }
+          }
+        },
+        { "name": "Find My Review For Content", "request": { "method": "GET", "url": "{{baseUrl}}/review/{{contentId}}/my-review" } },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title\": \"Great movie\",\n  \"description\": \"Really enjoyed the plot twist and acting.\",\n  \"rating\": 5,\n  \"contentId\": \"{{contentId}}\"\n}" },
+            "url": "{{baseUrl}}/review"
+          }
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"rating\": 4\n}" },
+            "url": "{{baseUrl}}/review/{{reviewId}}"
+          }
+        },
+        { "name": "Remove", "request": { "method": "DELETE", "url": "{{baseUrl}}/review/{{reviewId}}" } }
+      ]
+    },
+    {
+      "name": "Favorite",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"contentId\": \"{{contentId}}\"\n}" },
+            "url": "{{baseUrl}}/favorite"
+          }
+        },
+        { "name": "Find All By User", "request": { "method": "GET", "url": "{{baseUrl}}/favorite" } },
+        { "name": "Find One", "request": { "method": "GET", "url": "{{baseUrl}}/favorite/{{contentId}}" } },
+        { "name": "Remove", "request": { "method": "DELETE", "url": "{{baseUrl}}/favorite/{{contentId}}" } }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "item": [
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"contentId\": \"{{contentId}}\"\n}" },
+            "url": "{{baseUrl}}/wishlist"
+          }
+        },
+        { "name": "Find All By User", "request": { "method": "GET", "url": "{{baseUrl}}/wishlist" } },
+        { "name": "Find One", "request": { "method": "GET", "url": "{{baseUrl}}/wishlist/{{contentId}}" } },
+        { "name": "Remove", "request": { "method": "DELETE", "url": "{{baseUrl}}/wishlist/{{contentId}}" } }
+      ]
+    },
+    {
+      "name": "TMDB Sync",
+      "item": [
+        {
+          "name": "Sync All",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/tmdb-sync?page=1&maxPages=5",
+              "host": ["{{baseUrl}}"], "path": ["tmdb-sync"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "maxPages", "value": "5" }
+              ]
+            }
+          }
+        },
+        { "name": "Sync Movie Genres", "request": { "method": "POST", "url": "{{baseUrl}}/tmdb-sync/movie-genres" } },
+        { "name": "Sync Series Genres", "request": { "method": "POST", "url": "{{baseUrl}}/tmdb-sync/series-genres" } },
+        {
+          "name": "Sync Popular Movies",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/tmdb-sync/popular-movies?page=1&limit=20&maxPages=5",
+              "host": ["{{baseUrl}}"], "path": ["tmdb-sync", "popular-movies"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "maxPages", "value": "5" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Sync Popular Series (not implemented)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/tmdb-sync/popular-series?page=1&limit=20&maxPages=5",
+              "host": ["{{baseUrl}}"], "path": ["tmdb-sync", "popular-series"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "maxPages", "value": "5" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Seed",
+      "item": [
+        {
+          "name": "Seed Database (all)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"usersCount\": 10,\n  \"reviewsCount\": 50,\n  \"wishlistCount\": 50,\n  \"favoritesCount\": 50\n}" },
+            "url": "{{baseUrl}}/seed"
+          }
+        },
+        {
+          "name": "Seed Users",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"count\": 10\n}" },
+            "url": "{{baseUrl}}/seed/users"
+          }
+        },
+        {
+          "name": "Seed Reviews",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"count\": 50\n}" },
+            "url": "{{baseUrl}}/seed/reviews"
+          }
+        },
+        {
+          "name": "Seed Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"count\": 50\n}" },
+            "url": "{{baseUrl}}/seed/wishlist"
+          }
+        },
+        {
+          "name": "Seed Favorites",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"count\": 50\n}" },
+            "url": "{{baseUrl}}/seed/favorites"
+          }
+        },
+        { "name": "Clear Seeded Data", "request": { "method": "DELETE", "url": "{{baseUrl}}/seed" } }
+      ]
+    }
+  ]
+}
