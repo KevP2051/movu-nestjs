@@ -10,4 +10,7 @@ export class CreateGenreDto {
     @IsString()
     name: string;
 
+    @IsString()
+    slug: string;
+
 }
