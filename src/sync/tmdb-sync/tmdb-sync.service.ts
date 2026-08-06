@@ -19,42 +19,39 @@ export class TmdbSyncService {
   }
 
 
+  async syncAll(pagination: TmdbSyncPaginationDto) {
+    // Genres first: movies reference genreIds.
+    // ponytail: series omitted, add here once syncPopularSeries is implemented.
+    const movieGenres = await this.syncMovieGenres();
+    const seriesGenres = await this.syncSeriesGenres();
+    const popularMovies = await this.syncPopularMovies(pagination);
+
+    return { movieGenres, seriesGenres, popularMovies };
+  }
+
   async syncMovieGenres() {
-    try {
-      const genres = await this.tmdbService.getMovieGenres()
+    const genres = await this.tmdbService.getMovieGenres()
 
-      for (const genre of genres) {
-        await this.genresService.createOrUpdateGenre(genre);
-      }
-
-      return {
-        totalSynced: genres.length,
-        message: `Successfully synced ${genres.length} movie genres`
-      }
-    } catch (error) {
-
-      //error handling logic
+    for (const genre of genres) {
+      await this.genresService.createOrUpdateGenre(genre);
     }
 
-
-
+    return {
+      totalSynced: genres.length,
+      message: `Successfully synced ${genres.length} movie genres`
+    }
   }
 
   async syncSeriesGenres() {
-    try {
+    const genres = await this.tmdbService.getSeriesGenres();
 
-      const genres = await this.tmdbService.getSeriesGenres();
-      for (const genre of genres) {
-        await this.genresService.createOrUpdateGenre(genre);
+    for (const genre of genres) {
+      await this.genresService.createOrUpdateGenre(genre);
+    }
 
-      }
-      return {
-        totalSynced: genres.length,
-        message: `Successfully synced ${genres.length} series genres`
-      }
-
-    } catch (error) {
-
+    return {
+      totalSynced: genres.length,
+      message: `Successfully synced ${genres.length} series genres`
     }
   }
 

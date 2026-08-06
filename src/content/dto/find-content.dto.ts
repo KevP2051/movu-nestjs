@@ -15,7 +15,7 @@ export class FindContentDto extends PaginationDto {
 
     @IsOptional()
     @IsString()
-    genre?: string = 'all';
+    genreSlug?: string = 'all';
 
 
 }

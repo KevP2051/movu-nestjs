@@ -117,7 +117,7 @@ export class ReviewService {
 
   async update(id: string, userId: string, updateReviewDto: UpdateReviewDto) {
 
-    const reviewToUpdate = await this.reviewRepository.findOne({ where: { id }, relations: { user: true } });
+    const reviewToUpdate = await this.reviewRepository.findOne({ where: { id }, relations: { user: true, content: true } });
 
     if (!reviewToUpdate) {
       throw new NotFoundException(`Review with id ${id} not found`);
@@ -137,7 +137,7 @@ export class ReviewService {
 
   async remove(id: string, userId: string) {
 
-    const reviewToDelete = await this.reviewRepository.findOne({ where: { id }, relations: { user: true } });
+    const reviewToDelete = await this.reviewRepository.findOne({ where: { id }, relations: { user: true, content: true } });
 
     if (!reviewToDelete) {
       throw new NotFoundException(`Review with id ${id} not found`);

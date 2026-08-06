@@ -25,6 +25,12 @@ export class GenreEntity {
     })
     name: string;
 
+    @Column({
+        type: 'text',
+        unique: true
+    })
+    slug: string;
+
     @ManyToMany(() => ContentEntity, (content) => content.genres)
     contents: ContentEntity[];
 

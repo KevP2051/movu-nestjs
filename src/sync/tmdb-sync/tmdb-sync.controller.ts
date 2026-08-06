@@ -7,6 +7,11 @@ import { TmdbSyncPaginationDto } from './dto/tmdb-sync-pagination.dto';
 export class TmdbSyncController {
   constructor(private readonly tmdbSyncService: TmdbSyncService) { }
 
+  @Post()
+  syncAll(@Query() queryParameters: TmdbSyncPaginationDto) {
+    return this.tmdbSyncService.syncAll(queryParameters);
+  }
+
   @Post('movie-genres')
   syncMovieGenres() {
     return this.tmdbSyncService.syncMovieGenres();
