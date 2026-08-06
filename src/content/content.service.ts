@@ -35,8 +35,6 @@ export class ContentService {
 
   async getHomeContent(contentType: ContentTypeEnum, userId?: string) {
 
-    // Todo el contenido del tipo (con sus géneros) en UNA sola consulta,
-    // en lugar de una consulta por cada género.
     const [genres, contents] = await Promise.all([
       this.genresService.findAllByType(contentType),
       this.contentRepository.find({
@@ -47,7 +45,6 @@ export class ContentService {
 
     const contentIds = contents.map((content) => content.id);
 
-    // Una consulta para wishlist y otra para favoritos (no una por contenido).
     const [wishlistedIds, favoritedIds] = userId
       ? await Promise.all([
         this.wishlistService.getWishlistedContentIds(userId, contentIds),
@@ -57,6 +54,7 @@ export class ContentService {
 
     const contentByGenre = genres.map((genre) => ({
       genre: genre.name,
+      slug: genre.slug,
       content: contents
         .filter((content) => content.genres.some((g) => g.id === genre.id))
         .map((content) => ({

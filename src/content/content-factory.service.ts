@@ -48,6 +48,7 @@ export class ContentFactoryService {
             overview: input.overview,
             releaseDate: input.releaseDate,
             posterPath: input.posterPath,
+            backdropUrl: input.backdropPath,
             popularity: input.popularity,
             adult: input.adult,
             type: input.type ?? ContentTypeEnum.MOVIE,
