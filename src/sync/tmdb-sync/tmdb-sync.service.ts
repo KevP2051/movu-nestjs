@@ -20,13 +20,13 @@ export class TmdbSyncService {
 
 
   async syncAll(pagination: TmdbSyncPaginationDto) {
-    // Genres first: movies reference genreIds.
-    // ponytail: series omitted, add here once syncPopularSeries is implemented.
+    // Genres first: movies and series reference genreIds.
     const movieGenres = await this.syncMovieGenres();
     const seriesGenres = await this.syncSeriesGenres();
     const popularMovies = await this.syncPopularMovies(pagination);
+    const popularSeries = await this.syncPopularSeries(pagination);
 
-    return { movieGenres, seriesGenres, popularMovies };
+    return { movieGenres, seriesGenres, popularMovies, popularSeries };
   }
 
   async syncMovieGenres() {
@@ -57,6 +57,27 @@ export class TmdbSyncService {
 
   async syncPopularSeries({ page = 1, maxPages = 1 }: TmdbSyncPaginationDto) {
 
+    let totalSynced = 0;
+
+    for (let currentPage = page; currentPage <= maxPages; currentPage++) {
+      try {
+        const populars = await this.tmdbService.getPopularSeries(currentPage);
+
+        for (const popular of populars) {
+          const series = await this.tmdbService.getSeriesWithCredits(popular.tmdbId);
+          await this.contentFactory.createOrUpdateSeries(series);
+          totalSynced++;
+        }
+
+      } catch (error) {
+        console.error(`Failed to sync popular series at page ${currentPage}`, error);
+      }
+    }
+
+    return {
+      totalSynced,
+      message: `Successfully synced ${totalSynced} popular series from pages ${page} to ${maxPages}`
+    };
   }
 
   async syncPopularMovies({ page = 1, maxPages = 1 }: TmdbSyncPaginationDto) {

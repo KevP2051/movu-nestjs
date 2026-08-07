@@ -29,7 +29,7 @@ export class TmdbSyncController {
 
   @Post('popular-series')
   syncPopularSeries(@Query() queryParameters: TmdbSyncPaginationDto) {
-    //tv show sync logic
+    return this.tmdbSyncService.syncPopularSeries(queryParameters);
   }
 
 

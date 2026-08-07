@@ -55,6 +55,16 @@ export class CreateContentDto {
     runtime?: number;
 
     @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    numberOfSeasons?: number;
+
+    @IsOptional()
+    @IsNumber()
+    @IsPositive()
+    numberOfEpisodes?: number;
+
+    @IsOptional()
     @IsEnum(ContentTypeEnum)
     type?: ContentTypeEnum;
 

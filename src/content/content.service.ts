@@ -3,7 +3,7 @@ import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ContentEntity } from './entities/content.entity';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { GenresService } from 'src/genres/genres.service';
 import { ContentTypeEnum } from 'src/common/enums/content-type.enum';
 import { WishlistService } from 'src/wishlist/wishlist.service';
@@ -126,6 +126,81 @@ export class ContentService {
       },
     };
 
+  }
+
+  async findTopRatedOfTheWeek(findContentDto: FindContentDto, userId?: string) {
+
+    const { contentType, page = 1, limit = 4 } = findContentDto;
+
+    const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+    const { count } = await this.weeklyRatedQuery(since, contentType)
+      .select('COUNT(DISTINCT content.id)', 'count')
+      .getRawOne();
+
+    const totalItems = Number(count);
+
+    const rankedRows = await this.weeklyRatedQuery(since, contentType)
+      .select('content.id', 'id')
+      .addSelect('AVG(review.rating)', 'weeklyRating')
+      .addSelect('COUNT(review.id)', 'weeklyReviewsCount')
+      .groupBy('content.id')
+      .orderBy('"weeklyRating"', 'DESC')
+      .addOrderBy('"weeklyReviewsCount"', 'DESC')
+      .offset((page - 1) * limit)
+      .limit(limit)
+      .getRawMany();
+
+    const contents = rankedRows.length
+      ? await this.contentRepository.find({
+        where: { id: In(rankedRows.map((row) => row.id)) },
+        relations: { genres: true }
+      })
+      : [];
+
+    const contentById = new Map(contents.map((content) => [content.id, content]));
+
+    const [wishlistedIds, favoritedIds] = userId && contents.length
+      ? await Promise.all([
+        this.wishlistService.getWishlistedContentIds(userId, contents.map((content) => content.id)),
+        this.favoriteService.getFavoritedContentIds(userId, contents.map((content) => content.id))
+      ])
+      : [new Set<string>(), new Set<string>()];
+
+    // find() ignores the ranking, so rebuild the order from the ranked rows.
+    const data = rankedRows
+      .filter((row) => contentById.has(row.id))
+      .map((row) => ({
+        ...contentById.get(row.id)!,
+        weeklyRating: Number(row.weeklyRating),
+        weeklyReviewsCount: Number(row.weeklyReviewsCount),
+        isInWishlist: wishlistedIds.has(row.id),
+        isInFavorites: favoritedIds.has(row.id)
+      }));
+
+    return {
+      data,
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+      },
+    };
+
+  }
+
+  private weeklyRatedQuery(since: Date, contentType?: ContentTypeEnum) {
+
+    const query = this.contentRepository.createQueryBuilder('content')
+      .innerJoin('content.reviews', 'review')
+      .where('review.createdAt >= :since', { since });
+
+    if (contentType) {
+      query.andWhere('content.type = :contentType', { contentType });
+    }
+
+    return query;
   }
 
   async findOne(contentId: string) {

@@ -21,6 +21,12 @@ export class ContentController {
     return this.contentService.findAll(query);
   }
 
+  @Get('top-rated-week')
+  @OptionalAuth()
+  findTopRatedOfTheWeek(@Query() query: FindContentDto, @GetUser() user: User) {
+    return this.contentService.findTopRatedOfTheWeek(query, user?.id);
+  }
+
   @Get('home')
   @OptionalAuth()
   getHomeContent(@Query('contentType', new ParseEnumPipe(ContentTypeEnum)) contentType: ContentTypeEnum, @GetUser() user: User) {

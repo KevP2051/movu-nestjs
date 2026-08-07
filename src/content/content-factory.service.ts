@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { DataSource, EntityManager } from 'typeorm';
 import { ContentEntity } from './entities/content.entity';
 import { MovieEntity } from '../movies/entities/movie.entity';
+import { SeriesEntity } from '../series/entities/series.entity';
 import { CreateContentDto } from './dto/create-content.dto';
 import { CreateContentCreditDto } from './dto/create-content-credit.dto';
 import { GenresService } from '../genres/genres.service';
@@ -28,6 +29,25 @@ export class ContentFactoryService {
         } catch (error: any) {
             throw new InternalServerErrorException(
                 'Failed to create or update movie and content',
+                error.message,
+            );
+        }
+    }
+
+    async createOrUpdateSeries(input: CreateContentDto): Promise<SeriesEntity> {
+        try {
+            return await this.dataSource.transaction(async (manager) => {
+                const content = await this.upsertContent(manager, {
+                    ...input,
+                    type: ContentTypeEnum.SERIES,
+                });
+                const series = await this.upsertSeries(manager, content, input);
+                await this.upsertCredits(manager, content, input.credits ?? []);
+                return series;
+            });
+        } catch (error: any) {
+            throw new InternalServerErrorException(
+                'Failed to create or update series and content',
                 error.message,
             );
         }
@@ -84,6 +104,25 @@ export class ContentFactoryService {
         });
 
         return manager.save(movie);
+    }
+
+    private async upsertSeries(
+        manager: EntityManager,
+        content: ContentEntity,
+        input: CreateContentDto,
+    ): Promise<SeriesEntity> {
+        const existing = await manager.findOne(SeriesEntity, {
+            where: { id: content.id },
+        });
+
+        const series = manager.create(SeriesEntity, {
+            id: content.id,
+            content,
+            numberOfSeasons: input.numberOfSeasons ?? existing?.numberOfSeasons ?? 0,
+            numberOfEpisodes: input.numberOfEpisodes ?? existing?.numberOfEpisodes ?? 0,
+        });
+
+        return manager.save(series);
     }
 
     private async upsertCredits(

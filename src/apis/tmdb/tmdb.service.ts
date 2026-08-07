@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { AxiosAdapter } from 'src/common/adapters/axios.adapter';
-import { TmdbMovieListResponse, TmdbSeriesGenresResponse, TmdbMovieGenresResponse } from './interfaces';
+import { TmdbMovieListResponse, TmdbSeriesGenresResponse, TmdbMovieGenresResponse, TmdbSeriesListResponse } from './interfaces';
 import { TmdbMovieMapper } from './mappers/tmdb-movie.mapper';
+import { TmdbSeriesMapper } from './mappers/tmdb-series.mapper';
 import { TmdbGenresMapper } from './mappers/tmdb-genres.mapper';
 import { TmdbMovieDetailsResponse, TmdbMovieResponse } from './interfaces/tmdb-movie-response';
+import { TmdbSeriesDetailsResponse, TmdbSeriesResponse } from './interfaces/tmdb-series-response';
 
 @Injectable()
 export class TmdbService {
@@ -55,5 +57,24 @@ export class TmdbService {
 
     async getSeriesCast(tmdbId: number) {
         return await this.http.get<any>(`${this.baseUrl}/tv/${tmdbId}/credits?api_key=${this.apiKey}`, { headers: this.headers });
+    }
+
+    async getSeries(tmdbId: number) {
+        return TmdbSeriesMapper.toSeries(await this.http.get<TmdbSeriesResponse>(`${this.baseUrl}/tv/${tmdbId}?api_key=${this.apiKey}`, { headers: this.headers }));
+    }
+
+    async getPopularSeries(page: number) {
+        const url = `${this.baseUrl}/tv/popular?page=${page}`;
+        return TmdbSeriesMapper.toSeriesList(await this.http.get<TmdbSeriesListResponse>(url, { headers: this.headers }));
+    }
+
+    async searchSeries(query: string) {
+        return await this.http.get<any>(`${this.baseUrl}/search/tv?query=${encodeURIComponent(query)}`, { headers: this.headers });
+    }
+
+    async getSeriesWithCredits(tmdbId: number) {
+        const url = `${this.baseUrl}/tv/${tmdbId}?append_to_response=credits`;
+        const data = await this.http.get<TmdbSeriesDetailsResponse>(url, { headers: this.headers });
+        return TmdbSeriesMapper.toSeriesWithCredits(data);
     }
 }
