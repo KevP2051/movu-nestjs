@@ -20,7 +20,10 @@ export class GenresService {
   //TODO: Surround by a try-catch block to handle potential errors during database operations
   async createOrUpdateGenre(genreData: CreateGenreDto) {
 
-    const existingGenre = await this.genreRepository.findOneBy({ tmdbId: genreData.tmdbId });
+    const existingGenre = await this.genreRepository.findOneBy({
+      tmdbId: genreData.tmdbId,
+      contentType: genreData.contentType
+    });
 
     if (existingGenre) {
       return await this.genreRepository.save({ ...existingGenre, ...genreData, slug: existingGenre.slug || slugify(genreData.name, { lower: true, strict: true }) });

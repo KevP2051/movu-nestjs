@@ -1,7 +1,9 @@
-import { Controller, Post, Query } from '@nestjs/common';
+import { Controller, Delete, Post, Query } from '@nestjs/common';
 import { TmdbSyncService } from './tmdb-sync.service';
 
 import { TmdbSyncPaginationDto } from './dto/tmdb-sync-pagination.dto';
+import { Auth } from 'src/auth/decorators';
+import { ValidRoles } from 'src/auth/enums/valid-roles.enum';
 
 @Controller('tmdb-sync')
 export class TmdbSyncController {
@@ -30,6 +32,10 @@ export class TmdbSyncController {
   @Post('popular-series')
   syncPopularSeries(@Query() queryParameters: TmdbSyncPaginationDto) {
     return this.tmdbSyncService.syncPopularSeries(queryParameters);
+  }
+
+  clearSyncedData() {
+    return this.tmdbSyncService.clearSyncedData();
   }
 
 

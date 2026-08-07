@@ -71,13 +71,17 @@ export class ContentService {
 
   async findAll(findContentDto: FindContentDto) {
 
-    const { contentType, sortBy, genreSlug, page = 1, limit = 20 } = findContentDto;
+    const { contentType, sortBy, genreSlug, search, page = 1, limit = 20 } = findContentDto;
 
     const query = this.contentRepository.createQueryBuilder('content')
       .leftJoinAndSelect('content.genres', 'genre');
 
     if (contentType) {
       query.andWhere('content.type = :contentType', { contentType });
+    }
+
+    if (search) {
+      query.andWhere('content.title ILIKE :search', { search: `%${search}%` });
     }
 
     if (genreSlug && genreSlug !== 'all') {

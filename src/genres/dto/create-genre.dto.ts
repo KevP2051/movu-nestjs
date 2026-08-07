@@ -1,4 +1,5 @@
-import { IsNumber, IsPositive, IsString } from "class-validator";
+import { IsEnum, IsNumber, IsPositive, IsString } from "class-validator";
+import { ContentTypeEnum } from "src/common/enums/content-type.enum";
 
 
 export class CreateGenreDto {
@@ -9,5 +10,9 @@ export class CreateGenreDto {
 
     @IsString()
     name: string;
+
+    // The same tmdbId means a different genre depending on the content type.
+    @IsEnum(ContentTypeEnum)
+    contentType: ContentTypeEnum;
 
 }

@@ -1,3 +1,4 @@
+import { Transform } from "class-transformer";
 import { IsEnum, IsOptional, IsString } from "class-validator";
 import { ContentSortEnum } from "../enums/content-sort.enum";
 import { ContentTypeEnum } from "src/common/enums/content-type.enum";
@@ -16,6 +17,11 @@ export class FindContentDto extends PaginationDto {
     @IsOptional()
     @IsString()
     genreSlug?: string = 'all';
+
+    @IsOptional()
+    @IsString()
+    @Transform(({ value }) => value?.trim())
+    search?: string;
 
 
 }

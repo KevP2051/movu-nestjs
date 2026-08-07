@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { AuthModule } from 'src/auth/auth.module';
 import { TmdbSyncService } from './tmdb-sync.service';
 import { TmdbSyncController } from './tmdb-sync.controller';
 import { TmdbModule } from 'src/apis/tmdb/tmdb.module';
@@ -11,6 +13,6 @@ import { ContentModule } from 'src/content/content.module';
 @Module({
   controllers: [TmdbSyncController],
   providers: [TmdbSyncService],
-  imports: [TmdbModule, MoviesModule, SeriesModule, GenresModule, ContentModule]
+  imports: [TmdbModule, MoviesModule, SeriesModule, GenresModule, ContentModule, ConfigModule, AuthModule]
 })
 export class TmdbSyncModule { }

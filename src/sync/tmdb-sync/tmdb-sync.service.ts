@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { DataSource, EntityTarget, ObjectLiteral } from 'typeorm';
 import { TmdbService } from 'src/apis/tmdb/tmdb.service';
 import { MoviesService } from 'src/movies/movies.service';
 import { PaginationDto } from 'src/common/dto/pagination-dto';
@@ -6,6 +8,32 @@ import { Movie } from 'src/common/interfaces/movie.interface';
 import { TmdbSyncPaginationDto } from './dto/tmdb-sync-pagination.dto';
 import { GenresService } from 'src/genres/genres.service';
 import { ContentFactoryService } from 'src/content/content-factory.service';
+import { ContentEntity } from 'src/content/entities/content.entity';
+import { ContentCreditEntity } from 'src/content/entities/content-credit';
+import { MovieEntity } from 'src/movies/entities/movie.entity';
+import { SeriesEntity } from 'src/series/entities/series.entity';
+import { GenreEntity } from 'src/genres/entities/genre.entity';
+import { PersonEntity } from 'src/person/entities/person.entity';
+import { ReviewEntity } from 'src/review/entities/review.entity';
+import { WishlistEntity } from 'src/wishlist/entities/wishlist.entity';
+import { FavoriteEntity } from 'src/favorite/entities/favorite.entity';
+
+/**
+ * Every table wiped by clearSyncedData. Reviews, wishlist and favorites are
+ * user data, not synced data, but they hold a NOT NULL foreign key to content,
+ * so they cannot survive a content wipe. Users themselves are never touched.
+ */
+const SYNCED_ENTITIES: EntityTarget<ObjectLiteral>[] = [
+  ContentCreditEntity,
+  MovieEntity,
+  SeriesEntity,
+  ReviewEntity,
+  WishlistEntity,
+  FavoriteEntity,
+  ContentEntity,
+  PersonEntity,
+  GenreEntity,
+];
 
 @Injectable()
 export class TmdbSyncService {
@@ -15,6 +43,8 @@ export class TmdbSyncService {
     private readonly moviesService: MoviesService,
     private readonly genresService: GenresService,
     private readonly contentFactory: ContentFactoryService,
+    private readonly dataSource: DataSource,
+    private readonly configService: ConfigService,
   ) {
   }
 
@@ -27,6 +57,39 @@ export class TmdbSyncService {
     const popularSeries = await this.syncPopularSeries(pagination);
 
     return { movieGenres, seriesGenres, popularMovies, popularSeries };
+  }
+
+  async clearSyncedData() {
+
+    this.ensureClearingIsAllowed();
+
+    const tables = SYNCED_ENTITIES.map((entity) => this.dataSource.getMetadata(entity).tableName);
+
+    const deletedRows: Record<string, number> = {};
+
+    for (const entity of SYNCED_ENTITIES) {
+      const metadata = this.dataSource.getMetadata(entity);
+      deletedRows[metadata.tableName] = await this.dataSource.getRepository(entity).count();
+    }
+
+    // CASCADE also empties the content/genre join table, which no entity owns.
+    await this.dataSource.query(
+      `TRUNCATE TABLE ${tables.map((table) => `"${table}"`).join(', ')} RESTART IDENTITY CASCADE`
+    );
+
+    return {
+      deletedRows,
+      message: 'Successfully cleared all synced data. Reviews, wishlist and favorites were wiped too; users were kept.'
+    };
+  }
+
+  private ensureClearingIsAllowed() {
+
+    const environment = this.configService.get('app.environment');
+
+    if (environment === 'prod' || environment === 'production') {
+      throw new ForbiddenException('Clearing synced data is disabled in production environments');
+    }
   }
 
   async syncMovieGenres() {

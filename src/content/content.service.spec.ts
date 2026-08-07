@@ -1,5 +1,40 @@
 import { ContentService } from './content.service';
 
+describe('ContentService.findAll', () => {
+
+    const queryBuilder: any = {
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        getManyAndCount: jest.fn().mockResolvedValue([[], 0]),
+    };
+
+    const contentRepository: any = {
+        createQueryBuilder: jest.fn(() => queryBuilder),
+    };
+
+    const service = new ContentService(contentRepository, {} as any, {} as any, {} as any);
+
+    beforeEach(() => jest.clearAllMocks());
+
+    it('matches titles partially and case-insensitively', async () => {
+        await service.findAll({ search: 'matrix' });
+
+        expect(queryBuilder.andWhere).toHaveBeenCalledWith(
+            'content.title ILIKE :search',
+            { search: '%matrix%' },
+        );
+    });
+
+    it('does not filter by title when no search term is given', async () => {
+        await service.findAll({});
+
+        expect(queryBuilder.andWhere).not.toHaveBeenCalled();
+    });
+});
+
 describe('ContentService.findTopRatedOfTheWeek', () => {
 
     const rankedRows = [

@@ -1,6 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, ManyToMany } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, ManyToMany, Index } from "typeorm";
 import { ContentEntity } from "../../content/entities/content.entity";
 
+// TMDB reuses genre ids across movies and series (18 is Drama in both lists),
+// and the names collide too, so neither tmdbId nor slug is unique on its own.
+@Index(['tmdbId', 'contentType'], { unique: true })
+@Index(['slug', 'contentType'], { unique: true })
 @Entity()
 export class GenreEntity {
 
@@ -9,7 +13,6 @@ export class GenreEntity {
 
     @Column({
         type: 'int',
-        unique: true
     })
     tmdbId: number;
 
@@ -27,7 +30,6 @@ export class GenreEntity {
 
     @Column({
         type: 'text',
-        unique: true
     })
     slug: string;
 
